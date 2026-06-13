@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>ABC雪合戦（仮）</title>
+<style>
+  html,body{margin:0;padding:0;overflow:hidden;width:100%;height:100%;background:#BFE7FF;
+    font-family:"Hiragino Maru Gothic ProN","Rounded Mgen+",-apple-system,sans-serif;
+    -webkit-user-select:none;user-select:none;touch-action:none;}
+  #game{position:fixed;inset:0;}
+  .hud{position:fixed;pointer-events:none;z-index:10;}
+  /* HP bars */
+  #hpWrap{top:env(safe-area-inset-top,8px);left:0;right:0;display:flex;justify-content:space-between;padding:10px 14px;gap:12px;}
+  .hpBox{flex:1;max-width:42%;}
+  .hpName{font-size:12px;font-weight:bold;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35);margin-bottom:3px;}
+  .hpBar{height:14px;border-radius:8px;background:rgba(255,255,255,.45);overflow:hidden;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+  .hpFill{height:100%;border-radius:6px;transition:width .25s;}
+  #pHp .hpFill{background:linear-gradient(90deg,#FF8FB1,#FF5D8F);}
+  #cHp .hpFill{background:linear-gradient(90deg,#B79CFF,#8E6CF0);}
+  /* hand slots */
+  #slots{bottom:calc(env(safe-area-inset-bottom,8px) + 10px);left:12px;display:flex;gap:8px;}
+  #buffs{bottom:calc(env(safe-area-inset-bottom,8px) + 80px);left:12px;display:flex;flex-direction:column;gap:5px;}
+  .buff{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.78);border-radius:12px;padding:3px 9px;font-size:12px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+  .buff .bt{height:5px;border-radius:3px;background:rgba(0,0,0,.12);width:54px;overflow:hidden;}
+  .buff .bt i{display:block;height:100%;border-radius:3px;}
+  .slot{width:58px;height:58px;border-radius:14px;background:rgba(255,255,255,.55);border:2px solid #fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+  .slot .ch{font-size:24px;font-weight:900;line-height:1;}
+  .slot .lb{font-size:9px;color:#666;}
+  .slot .sh{font-size:9px;color:#444;font-weight:bold;}
+  /* message popup */
+  #msg{top:22%;left:0;right:0;text-align:center;font-size:22px;font-weight:900;color:#fff;
+    text-shadow:0 2px 0 rgba(0,0,0,.25),0 0 14px rgba(255,255,255,.6);opacity:0;transition:opacity .2s;}
+  #pickupTip{bottom:calc(env(safe-area-inset-bottom,8px) + 86px);left:0;right:0;text-align:center;}
+  #pickupTip .inner{display:inline-block;background:rgba(255,255,255,.85);border-radius:14px;padding:6px 12px;font-size:13px;font-weight:bold;color:#444;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+  /* touch UI */
+  .tbtn{position:fixed;z-index:20;border:none;border-radius:50%;font-weight:900;color:#fff;
+    box-shadow:0 3px 10px rgba(0,0,0,.2);touch-action:none;-webkit-tap-highlight-color:transparent;}
+  #btnThrow{right:18px;bottom:calc(env(safe-area-inset-bottom,8px) + 92px);width:74px;height:74px;font-size:15px;background:#FF5D8F;}
+  #btnGuard{right:104px;bottom:calc(env(safe-area-inset-bottom,8px) + 28px);width:64px;height:64px;font-size:14px;background:#4FA8FF;}
+  .pkbtn{position:fixed;z-index:20;border:none;border-radius:14px;padding:10px 14px;font-size:14px;font-weight:900;color:#fff;background:#5DD66B;box-shadow:0 3px 10px rgba(0,0,0,.2);-webkit-tap-highlight-color:transparent;}
+  #btnPickW{left:12px;bottom:calc(env(safe-area-inset-bottom,8px) + 150px);}
+  #btnPickS{left:12px;bottom:calc(env(safe-area-inset-bottom,8px) + 96px);background:#4FA8FF;}
+  #stick{position:fixed;z-index:20;left:18px;bottom:calc(env(safe-area-inset-bottom,8px) + 90px);width:110px;height:110px;border-radius:50%;
+    background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.7);touch-action:none;}
+  #stickKnob{position:absolute;left:35px;top:35px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  /* overlays */
+  .overlay{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(120,180,255,.55);backdrop-filter:blur(6px);text-align:center;padding:20px;}
+  .card{background:rgba(255,255,255,.92);border-radius:24px;padding:22px 26px;max-width:420px;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+  .card h1{margin:0 0 6px;font-size:26px;letter-spacing:.05em;
+    background:linear-gradient(90deg,#FF5D8F,#FFB13D,#5DD66B,#4FA8FF,#8E6CF0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .card p{font-size:13px;color:#555;margin:8px 0;line-height:1.7;}
+  .card .types{font-size:14px;font-weight:bold;margin:6px 0;}
+  .bigbtn{margin-top:10px;border:none;border-radius:16px;padding:12px 30px;font-size:17px;font-weight:900;color:#fff;
+    background:linear-gradient(90deg,#FF5D8F,#FF8FB1);box-shadow:0 4px 12px rgba(255,93,143,.4);cursor:pointer;}
+  .diffbtn{border:2px solid #FFB1C9;border-radius:12px;padding:8px 14px;font-size:14px;font-weight:bold;cursor:pointer;
+    background:#fff;color:#FF5D8F;transition:all .15s;}
+  .diffbtn.sel{background:linear-gradient(90deg,#FF5D8F,#FF8FB1);color:#fff;border-color:#FF5D8F;transform:scale(1.06);}
+  #flash{position:fixed;inset:0;z-index:25;background:rgba(255,60,90,.35);opacity:0;pointer-events:none;transition:opacity .3s;}
+  #cross{top:50%;left:50%;width:14px;height:14px;margin:-7px;z-index:9;}
+  #cross:before,#cross:after{content:"";position:absolute;background:rgba(255,255,255,.9);border-radius:2px;}
+  #cross:before{left:6px;top:0;width:2px;height:14px;}
+  #cross:after{top:6px;left:0;width:14px;height:2px;}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div class="hud" id="hpWrap">
+  <div class="hpBox" id="pHp"><div class="hpName">あなた ❤️</div><div class="hpBar"><div class="hpFill" style="width:100%"></div></div></div>
+  <div class="hpBox" id="cHp"><div class="hpName" style="text-align:right">COMくん 🤖</div><div class="hpBar"><div class="hpFill" style="width:100%"></div></div></div>
+</div>
+<div class="hud" id="cross"></div>
+<div class="hud" id="slots">
+  <div class="slot" id="slotW"><div class="ch">－</div><div class="lb">武器(右手)</div></div>
+  <div class="slot" id="slotS"><div class="ch">－</div><div class="lb">盾(左手)</div><div class="sh"></div></div>
+</div>
+<div class="hud" id="buffs"></div>
+<div class="hud" id="msg"></div>
+<div class="hud" id="pickupTip"><span class="inner" id="pickupTxt" style="display:none"></span></div>
+<div id="flash"></div>
+
+<div class="overlay" id="titleOv">
+  <div class="card">
+    <h1>ABC ゆきがっせん！</h1>
+    <p>落ちてるアルファベットを拾って、右手の<b>武器</b>で投げ、左手の<b>盾</b>でガード！<br>先に相手のHPを削ったほうの勝ち🏆</p>
+    <p class="types">🔥赤 ＞ 🌿緑 ＞ 💧青 ＞ 🔥赤…</p>
+    <p>相性で勝ってる攻撃は <b>盾を一撃で粉砕</b>！<br>相性で負けてると盾に25%しか入らない…</p>
+    <p id="ctrlTxt"></p>
+    <p style="font-weight:bold;margin-bottom:4px">COMくんの強さ</p>
+    <div id="diffSel" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:6px">
+      <button class="diffbtn" data-d="easy">よわい</button>
+      <button class="diffbtn" data-d="normal">ふつう</button>
+      <button class="diffbtn" data-d="hard">つよい</button>
+      <button class="diffbtn" data-d="super">超つよい</button>
+    </div>
+    <button class="bigbtn" id="btnStart">バトル開始！</button>
+  </div>
+</div>
+<div class="overlay" id="endOv" style="display:none">
+  <div class="card">
+    <h1 id="endTitle">WIN!</h1>
+    <p id="endTxt"></p>
+    <button class="bigbtn" onclick="location.reload()">もう一回！</button>
+  </div>
+</div>
+
+<div class="overlay" id="pauseOv" style="display:none">
+  <div class="card">
+    <h1>⏸ きゅうけい中</h1>
+    <p>マウスが解放されたよ。<br>モニター間の移動もこのスキにどうぞ！</p>
+    <button class="bigbtn" id="btnResume">バトルに戻る</button>
+    <br><button class="bigbtn" style="background:linear-gradient(90deg,#9aa,#bcc);margin-top:8px;font-size:14px;padding:8px 20px" onclick="location.reload()">はじめから</button>
+  </div>
+</div>
+
+<button class="tbtn" id="btnThrow" style="display:none">なげる</button>
+<button class="tbtn" id="btnGuard" style="display:none">ガード</button>
+<button class="pkbtn" id="btnPickW" style="display:none">拾う→武器</button>
+<button class="pkbtn" id="btnPickS" style="display:none">拾う→盾</button>
+<div id="stick" style="display:none"><div id="stickKnob"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{ "use strict";
+// ============ 基本設定 ============
+const IS_TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints>0;
+const ARENA_R = 17;
+const GRAV = -18;
+
+// タイプ：fire / grass / water
+const TYPES = {
+  fire :{color:0xFF5D73, css:'#FF5D73', emoji:'🔥', name:'炎'},
+  grass:{color:0x4FC95D, css:'#4FC95D', emoji:'🌿', name:'草'},
+  water:{color:0x4FA8FF, css:'#4FA8FF', emoji:'💧', name:'水'},
+};
+const BEATS = {fire:'grass', grass:'water', water:'fire'}; // key が value に強い
+
+// 文字ごとの性能（dmg:攻撃力 spd:弾速 drag:空気抵抗 def:盾の硬さ trait:ひとこと）
+const LETTERS = {
+  A:{dmg:24, spd:24, drag:.09, def:1.05, trait:'三角どっしり。盾も攻めも安定'},
+  B:{dmg:25, spd:22, drag:.11, def:1.1,  trait:'まるっと頑丈。良い盾'},
+  C:{dmg:21, spd:24, drag:.12, def:.7,  trait:'開いた口…盾は少し穴あき'},
+  D:{dmg:25, spd:22, drag:.11, def:1.15, trait:'片面ぴったり。守り向き'},
+  E:{dmg:26, spd:21, drag:.12, def:1.15, trait:'ぎっしり重め。盾向き'},
+  F:{dmg:22, spd:25, drag:.09, def:.85, trait:'軽め。投げると伸びる'},
+  G:{dmg:25, spd:22, drag:.12, def:1.05, trait:'丸み＋ひっかけ。万能'},
+  H:{dmg:24, spd:24, drag:.08, def:1.0,  trait:'はしご型。バランス良し'},
+  I:{dmg:18, spd:30, drag:.02, def:.55, trait:'まっすぐ速い！でも盾には細すぎ'},
+  J:{dmg:20, spd:26, drag:.07, def:.7,  trait:'フック形。曲がって飛ぶ'},
+  K:{dmg:26, spd:23, drag:.10, def:.95, trait:'蹴り出す形。攻め向き'},
+  L:{dmg:22, spd:25, drag:.08, def:.9,  trait:'軽快。変な回転がかわいい'},
+  M:{dmg:28, spd:20, drag:.13, def:1.2,  trait:'山ふたつ。重くて硬い'},
+  N:{dmg:25, spd:23, drag:.10, def:1.0,  trait:'ジグザグ安定型'},
+  O:{dmg:22, spd:22, drag:.15, def:.65, trait:'まんなか空洞…盾には不向きw'},
+  P:{dmg:23, spd:24, drag:.10, def:.9,  trait:'上重心。投げると回る'},
+  Q:{dmg:24, spd:22, drag:.13, def:.8,  trait:'しっぽ付きのO。クセあり'},
+  R:{dmg:26, spd:23, drag:.10, def:1.0,  trait:'蹴り脚つき。攻守バランス'},
+  S:{dmg:21, spd:23, drag:.10, def:.9,  trait:'ふらふら曲がるくせ者'},
+  T:{dmg:24, spd:24, drag:.08, def:1.0,  trait:'バランス型。投げても守っても◎'},
+  U:{dmg:23, spd:23, drag:.11, def:.95, trait:'受け皿型。地味に守れる'},
+  V:{dmg:20, spd:26, drag:.06, def:.8,  trait:'よく飛ぶブーメラン気質'},
+  W:{dmg:29, spd:19, drag:.14, def:1.25, trait:'最大級！重くて超硬い盾'},
+  X:{dmg:30, spd:19, drag:.12, def:1.3,  trait:'重くて強い！最硬の盾'},
+  Y:{dmg:23, spd:25, drag:.08, def:.85, trait:'枝分かれ。投げ向き'},
+  Z:{dmg:25, spd:23, drag:.11, def:.95, trait:'稲妻形。シャープに飛ぶ'},
+};
+const FONT = {
+  A:["00100","01010","10001","10001","11111","10001","10001"],
+  B:["11110","10001","10001","11110","10001","10001","11110"],
+  C:["01110","10001","10000","10000","10000","10001","01110"],
+  D:["11110","10001","10001","10001","10001","10001","11110"],
+  E:["11111","10000","10000","11110","10000","10000","11111"],
+  F:["11111","10000","10000","11110","10000","10000","10000"],
+  G:["01110","10001","10000","10111","10001","10001","01110"],
+  H:["10001","10001","10001","11111","10001","10001","10001"],
+  I:["11111","00100","00100","00100","00100","00100","11111"],
+  J:["00111","00010","00010","00010","00010","10010","01100"],
+  K:["10001","10010","10100","11000","10100","10010","10001"],
+  L:["10000","10000","10000","10000","10000","10000","11111"],
+  M:["10001","11011","10101","10101","10001","10001","10001"],
+  N:["10001","11001","10101","10101","10101","10011","10001"],
+  O:["01110","10001","10001","10001","10001","10001","01110"],
+  P:["11110","10001","10001","11110","10000","10000","10000"],
+  Q:["01110","10001","10001","10001","10101","10010","01101"],
+  R:["11110","10001","10001","11110","10100","10010","10001"],
+  S:["01111","10000","10000","01110","00001","00001","11110"],
+  T:["11111","00100","00100","00100","00100","00100","00100"],
+  U:["10001","10001","10001","10001","10001","10001","01110"],
+  V:["10001","10001","10001","10001","01010","01010","00100"],
+  W:["10001","10001","10001","10101","10101","11011","10001"],
+  X:["10001","10001","01010","00100","01010","10001","10001"],
+  Y:["10001","10001","01010","00100","00100","00100","00100"],
+  Z:["11111","00001","00010","00100","01000","10000","11111"],
+};
+const LKEYS = Object.keys(LETTERS);
+
+// ============ Three.js シーン ============
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xBFE7FF);
+scene.fog = new THREE.Fog(0xBFE7FF, 32, 70);
+const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, .1, 200);
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+document.getElementById('game').appendChild(renderer.domElement);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+scene.add(new THREE.AmbientLight(0xffffff,.45));
+scene.add(new THREE.HemisphereLight(0xBFE7FF, 0xFFF6E8, 0.6));
+const sun = new THREE.DirectionalLight(0xfff6e0,1.1); sun.position.set(20,35,15); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xBFE7FF,0.4); fill.position.set(-15,20,-10); scene.add(fill);
+
+// 地面：パステル市松
+{ const c=document.createElement('canvas'); c.width=c.height=256; const g=c.getContext('2d');
+  for(let y=0;y<8;y++)for(let x=0;x<8;x++){g.fillStyle=(x+y)%2?'#FFF6E8':'#EAFBEF';g.fillRect(x*32,y*32,32,32);}
+  const tex=new THREE.CanvasTexture(c); tex.wrapS=tex.wrapT=THREE.RepeatWrapping; tex.repeat.set(14,14);
+  const ground=new THREE.Mesh(new THREE.CircleGeometry(ARENA_R+6,48),new THREE.MeshLambertMaterial({map:tex}));
+  ground.rotation.x=-Math.PI/2; scene.add(ground);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(ARENA_R,.25,8,64),new THREE.MeshLambertMaterial({color:0xFFB13D}));
+  ring.rotation.x=Math.PI/2; ring.position.y=.1; scene.add(ring); }
+
+// ふわふわ雲
+for(let i=0;i<7;i++){const cl=new THREE.Group();
+  for(let j=0;j<3;j++){const s=2+Math.random()*2;
+    const m=new THREE.Mesh(new THREE.BoxGeometry(s,s*.6,s),new THREE.MeshLambertMaterial({color:0xffffff}));
+    m.position.set(j*2-2,Math.random(),Math.random()*2); cl.add(m);}
+  cl.position.set((Math.random()-.5)*120,18+Math.random()*10,(Math.random()-.5)*120); scene.add(cl);}
+
+// ============ ボクセル文字ビルダー ============
+const VOX = new THREE.BoxGeometry(1,1,1);
+// 角を少し削った箱（リアル寄りのアルファベット用）
+function roundedBox(s){ const g=new THREE.BoxGeometry(s,s,s,2,2,2);
+  const p=g.attributes.position; const v=new THREE.Vector3();
+  for(let i=0;i<p.count;i++){ v.fromBufferAttribute(p,i);
+    const k=0.86; v.multiplyScalar(1); // 軽い面取り風に頂点を内側へ寄せる
+    p.setXYZ(i, v.x*(Math.abs(v.x)>s*0.49?k:1), v.y*(Math.abs(v.y)>s*0.49?k:1), v.z*(Math.abs(v.z)>s*0.49?k:1)); }
+  g.computeVertexNormals(); return g; }
+function buildLetter(ch, type, scale=0.32){
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({color:TYPES[type].color, roughness:0.35, metalness:0.05});
+  const rows = FONT[ch];
+  const cell=roundedBox(scale*1.04);
+  for(let y=0;y<7;y++)for(let x=0;x<5;x++){
+    if(rows[y][x]==='1'){ const m=new THREE.Mesh(cell,mat);
+      m.position.set((x-2)*scale,(3-y)*scale,0); g.add(m); } }
+  g.userData={ch,type};
+  return g;
+}
+// 手に持つ盾：1枚の繋がったジオメトリ（チカチカしない半透明）
+function buildShieldPanel(ch, type, scale){
+  const rows=FONT[ch]; const geoms=[];
+  for(let y=0;y<7;y++)for(let x=0;x<5;x++){
+    if(rows[y][x]==='1'){ let b=new THREE.BoxGeometry(scale*1.03,scale*1.03,scale*0.9);
+      b.translate((x-2)*scale,(3-y)*scale,0); b=b.toNonIndexed(); geoms.push(b); } }
+  // 手動マージ（r128にUtilsが無いため）
+  let total=0; for(const g of geoms) total+=g.attributes.position.count;
+  const pos=new Float32Array(total*3), nor=new Float32Array(total*3);
+  let o=0;
+  for(const g of geoms){ const p=g.attributes.position.array, n=g.attributes.normal.array;
+    pos.set(p,o); nor.set(n,o); o+=p.length; g.dispose(); }
+  // インデックス無し→そのまま面として使う（各Boxは非インデックス化）
+  const merged=new THREE.BufferGeometry();
+  merged.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  merged.setAttribute('normal',new THREE.BufferAttribute(nor,3));
+  const mat=new THREE.MeshLambertMaterial({color:TYPES[type].color,
+    transparent:true, opacity:0.62, depthWrite:true, side:THREE.FrontSide});
+  const mesh=new THREE.Mesh(merged,mat);
+  const grp=new THREE.Group(); grp.add(mesh); grp.userData={ch,type};
+  return grp;
+}
+
+// ============ フィールドの文字（空から降ってくる） ============
+const fieldLetters=[];
+const FIELD_SCALE=0.21; // 持ち物と同じ大きさに統一
+function spawnFieldLetter(x,z){
+  const ch=LKEYS[Math.floor(Math.random()*LKEYS.length)];
+  const tk=Object.keys(TYPES)[Math.floor(Math.random()*3)];
+  const g=buildLetter(ch,tk,FIELD_SCALE);
+  if(x===undefined){const a=Math.random()*Math.PI*2,r=4+Math.random()*(ARENA_R-6);x=Math.cos(a)*r;z=Math.sin(a)*r;}
+  g.position.set(x,14+Math.random()*10,z);
+  g.userData.vy=0; g.userData.landed=false; g.userData.dur=100;
+  scene.add(g); fieldLetters.push(g);
+}
+function landLetter(g,x,z){
+  g.userData.landed=true; g.userData.vy=0;
+  g.position.set(x,FIELD_SCALE*0.6,z);
+  g.rotation.set(-Math.PI/2,0,Math.random()*Math.PI*2); // 地面に転がる
+}
+for(let i=0;i<16;i++) spawnFieldLetter();
+
+// 砕けるエフェクト
+const parts=[];
+function shatter(pos,color){
+  for(let i=0;i<12;i++){
+    const m=new THREE.Mesh(VOX,new THREE.MeshLambertMaterial({color}));
+    m.scale.setScalar(.09); m.position.copy(pos);
+    parts.push({m,vel:new THREE.Vector3((Math.random()-.5)*6,Math.random()*5+2,(Math.random()-.5)*6),life:.6});
+    scene.add(m);
+  }
+}
+
+// ============ 宝石アイテム ============
+const GEMS = {
+  speed:{color:0x3DE8C8, css:'#3DE8C8', emoji:'💨', label:'スピードUP', dur:8},   // 風っぽいアクア
+  atk  :{color:0xFF4D6D, css:'#FF4D6D', emoji:'⚔️', label:'こうげきUP', dur:8},   // 炎っぽいルビー
+  def  :{color:0x5B7CFF, css:'#5B7CFF', emoji:'🛡️', label:'ぼうぎょUP', dur:8},   // 守りのサファイア
+};
+const GKEYS=Object.keys(GEMS);
+const gems=[];
+function buildGem(kind){
+  const g=new THREE.Group();
+  const col=GEMS[kind].color;
+  // 八面体の宝石（上下の尖り）
+  const top=new THREE.Mesh(new THREE.ConeGeometry(0.42,0.55,6),
+    new THREE.MeshLambertMaterial({color:col,emissive:col,emissiveIntensity:0.35,transparent:true,opacity:0.92}));
+  top.position.y=0.27;
+  const bot=top.clone(); bot.rotation.x=Math.PI; bot.position.y=-0.27;
+  g.add(top,bot);
+  // きらめきの芯（白く光る小球）
+  const core=new THREE.Mesh(new THREE.SphereGeometry(0.16,8,8),
+    new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.85}));
+  g.add(core);
+  g.userData={kind};
+  return g;
+}
+function spawnGem(){
+  const kind=GKEYS[Math.floor(Math.random()*GKEYS.length)];
+  const g=buildGem(kind);
+  const a=Math.random()*Math.PI*2, r=Math.random()*5; // 中央付近
+  g.position.set(Math.cos(a)*r, 16+Math.random()*6, Math.sin(a)*r);
+  g.userData.vy=0; g.userData.landed=false; g.userData.bob=Math.random()*Math.PI*2;
+  scene.add(g); gems.push(g);
+  chime([2349,2093,1760,1568,1319,1047,1319,1568],0.10,0.05); // 登場SE シャララララーン✨
+}
+
+// ============ プレイヤー & COM ============
+const player={pos:new THREE.Vector3(0,1.6,9), yaw:0, pitch:0, hp:100,
+  weapon:null, shield:null, shieldHP:0, guard:false, vel:new THREE.Vector3(),
+  buffs:{speed:0, atk:0, def:0}};
+const com={pos:new THREE.Vector3(0,0,-9), yaw:0, hp:100,
+  weapon:null, shield:null, shieldHP:0, guard:false,
+  state:'seek', timer:1, target:null, mesh:null, handW:null, handS:null, guardT:0,
+  buffs:{speed:0, atk:0, def:0}};
+
+// ============ 難易度設定 ============
+// moveMul:移動速度倍率 / throwMin,throwRand:投げ間隔(秒) / aim:狙いのブレ(小さいほど正確) / guardP:ガード確率
+const DIFFS={
+  easy  :{label:'よわい',   moveMul:0.75, throwMin:3.4, throwRand:2.6, aim:7.0, guardP:0.05, itemAggro:0},
+  normal:{label:'ふつう',   moveMul:1.0,  throwMin:2.6, throwRand:2.2, aim:4.5, guardP:0.12, itemAggro:7},
+  hard  :{label:'つよい',   moveMul:1.25, throwMin:1.8, throwRand:1.6, aim:2.6, guardP:0.22, itemAggro:14},
+  super :{label:'超つよい', moveMul:1.5,  throwMin:1.1, throwRand:1.0, aim:1.2, guardP:0.40, itemAggro:99},
+};
+let DIFF=DIFFS.normal; // スタート画面で選択
+
+// COMの見た目（雪だるま⛄ 紫マフラー）
+{ const g=buildSnowman(0x8E6CF0, false);
+  com.handW=new THREE.Group(); com.handW.position.set(-.7,1.15,.4); g.add(com.handW);
+  com.handS=new THREE.Group(); com.handS.position.set(.7,1.15,.4); g.add(com.handS);
+  com.mesh=g; scene.add(g); }
+
+// プレイヤーの見た目（雪だるま⛄ 虹のマフラー）
+const playerMesh=new THREE.Group();
+function buildSnowman(scarfCol, isPlayer){
+  const g=new THREE.Group();
+  const snow=new THREE.MeshStandardMaterial({color:0xFFFFFF, roughness:0.55, metalness:0.0});
+  const bottom=new THREE.Mesh(new THREE.SphereGeometry(0.62,20,20),snow); bottom.position.y=0.62; g.add(bottom);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.46,20,20),snow); head.position.y=1.62; g.add(head);
+  // マフラー（虹 or 色）
+  const scarf=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.12,10,20),
+    new THREE.MeshStandardMaterial({color:scarfCol, roughness:0.5})); 
+  scarf.position.y=1.22; scarf.rotation.x=Math.PI/2.2; g.add(scarf);
+  // 目（黒い小石）
+  const coal=new THREE.MeshStandardMaterial({color:0x2A2A35, roughness:0.7});
+  for(const sx of[-0.16,0.16]){const e=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,8),coal);
+    e.position.set(sx,1.7,0.4); g.add(e);}
+  // にんじんの鼻
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.32,10),
+    new THREE.MeshStandardMaterial({color:0xFF8A3D, roughness:0.5}));
+  nose.position.set(0,1.6,0.46); nose.rotation.x=Math.PI/2; g.add(nose);
+  // ほっぺ
+  const blush=new THREE.MeshStandardMaterial({color:0xFF9DBB, roughness:0.6, transparent:true, opacity:0.8});
+  for(const sx of[-0.26,0.26]){const b=new THREE.Mesh(new THREE.SphereGeometry(0.07,8,8),blush);
+    b.position.set(sx,1.55,0.38); b.scale.set(1,0.7,0.4); g.add(b);}
+  // ボタン（おなか）
+  for(const by of[0.5,0.75]){const bt=new THREE.Mesh(new THREE.SphereGeometry(0.05,8,8),coal);
+    bt.position.set(0,by,0.6); g.add(bt);}
+  return g;
+}
+{ const g=buildSnowman(0xFF5D8F, true); // プレイヤーは虹マフラー代わりにピンク基調
+  // 虹のマフラーに（複数色リング）
+  const cols=[0xFF5D8F,0xFFB13D,0x5DD66B,0x4FA8FF];
+  cols.forEach((c,i)=>{ const r=new THREE.Mesh(new THREE.TorusGeometry(0.4-i*0.02,0.05,8,20),
+    new THREE.MeshStandardMaterial({color:c,roughness:0.5})); r.position.y=1.16+i*0.03; r.rotation.x=Math.PI/2.2; g.add(r); });
+  playerMesh.add(g);
+  playerMesh.userData.handW=new THREE.Group(); playerMesh.userData.handW.position.set(-.7,1.15,.4); g.add(playerMesh.userData.handW);
+  playerMesh.userData.handS=new THREE.Group(); playerMesh.userData.handS.position.set(.7,1.15,.4); g.add(playerMesh.userData.handS);
+  scene.add(playerMesh);
+}
+const handW=playerMesh.userData.handW;
+const handS=playerMesh.userData.handS;
+scene.add(camera);
+
+function setHand(group, letter, scale, transparent){ group.clear();
+  if(letter){
+    const g = transparent ? buildShieldPanel(letter.ch,letter.type,scale) : buildLetter(letter.ch,letter.type,scale);
+    group.add(g);} }
+
+// ============ HUD ============
+const $=id=>document.getElementById(id);
+function updSlots(){
+  const w=$('slotW'),s=$('slotS');
+  if(player.weapon){w.querySelector('.ch').textContent=player.weapon.ch;
+    w.querySelector('.ch').style.color=TYPES[player.weapon.type].css;
+    w.querySelector('.lb').textContent=TYPES[player.weapon.type].emoji+' 武器';}
+  else{w.querySelector('.ch').textContent='－';w.querySelector('.ch').style.color='#aaa';w.querySelector('.lb').textContent='武器(右手)';}
+  if(player.shield){s.querySelector('.ch').textContent=player.shield.ch;
+    s.querySelector('.ch').style.color=TYPES[player.shield.type].css;
+    s.querySelector('.lb').textContent=TYPES[player.shield.type].emoji+' 盾';
+    s.querySelector('.sh').textContent='耐久'+Math.max(0,Math.round(player.shieldHP))+'%';}
+  else{s.querySelector('.ch').textContent='－';s.querySelector('.ch').style.color='#aaa';s.querySelector('.lb').textContent='盾(左手)';s.querySelector('.sh').textContent='';}
+}
+function updHP(){ $('pHp').querySelector('.hpFill').style.width=Math.max(0,player.hp)+'%';
+  $('cHp').querySelector('.hpFill').style.width=Math.max(0,com.hp)+'%'; }
+function updBuffHUD(){ const el=$('buffs'); let html='';
+  for(const k of GKEYS){ const tleft=player.buffs[k];
+    if(tleft>0){ const pct=Math.max(0,Math.min(100,tleft/GEMS[k].dur*100));
+      html+=`<div class="buff"><span>${GEMS[k].emoji}</span><span style="color:${GEMS[k].css}">×1.5</span>`+
+            `<span class="bt"><i style="width:${pct}%;background:${GEMS[k].css}"></i></span></div>`; } }
+  el.innerHTML=html;
+}
+let msgT=null;
+function showMsg(t,col='#fff'){ const m=$('msg'); m.textContent=t; m.style.color=col; m.style.opacity=1;
+  clearTimeout(msgT); msgT=setTimeout(()=>m.style.opacity=0,1400); }
+function flash(){ const f=$('flash'); f.style.opacity=1; setTimeout(()=>f.style.opacity=0,80); }
+
+// ============ ぴこぴこSFX ============
+let AC=null;
+function sfx(kind){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  const o=AC.createOscillator(),g=AC.createGain(); o.connect(g); g.connect(AC.destination);
+  const t=AC.currentTime; g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.001,t+.25);
+  if(kind==='throw'){o.type='triangle';o.frequency.setValueAtTime(500,t);o.frequency.exponentialRampToValueAtTime(900,t+.15);}
+  if(kind==='block'){o.type='square';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(150,t+.2);}
+  if(kind==='break'){o.type='sawtooth';o.frequency.setValueAtTime(600,t);o.frequency.exponentialRampToValueAtTime(80,t+.3);}
+  if(kind==='hit'){o.type='sine';o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(60,t+.25);}
+  if(kind==='pick'){o.type='triangle';o.frequency.setValueAtTime(700,t);o.frequency.exponentialRampToValueAtTime(1200,t+.12);}
+  if(kind==='land'){o.type='triangle';g.gain.setValueAtTime(.05,t);o.frequency.setValueAtTime(260,t);o.frequency.exponentialRampToValueAtTime(120,t+.12);}
+  o.start(t); o.stop(t+.3);}catch(e){} }
+// キラキラ和音（宝石の登場・取得用）
+function chime(notes,gainV=0.10,step=0.07){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  const t0=AC.currentTime;
+  notes.forEach((f,i)=>{ const o=AC.createOscillator(),g=AC.createGain();
+    o.type='triangle'; o.connect(g); g.connect(AC.destination);
+    const t=t0+i*step; g.gain.setValueAtTime(gainV,t); g.gain.exponentialRampToValueAtTime(.001,t+.35);
+    o.frequency.setValueAtTime(f,t); o.start(t); o.stop(t+.4); });
+}catch(e){} }
+
+// ============ 投擲物 ============
+const projectiles=[];
+function throwLetter(owner, letter, from, dir){
+  const st=LETTERS[letter.ch];
+  const g=buildLetter(letter.ch,letter.type,FIELD_SCALE);
+  g.position.copy(from);
+  scene.add(g);
+  projectiles.push({mesh:g, vel:dir.clone().multiplyScalar(st.spd), owner, letter,
+    drag:st.drag, life:5, sCurve:letter.ch==='S'?(Math.random()<.5?1:-1):0, t:0});
+  sfx('throw');
+}
+function matchupPct(att, def){ // 盾に与えるダメージ%
+  if(BEATS[att]===def) return 100;       // 有利→一撃粉砕
+  if(BEATS[def]===att) return 25;        // 不利
+  return 50;
+}
+
+function resolveHit(p, victim, isPlayer){
+  shatter(p.mesh.position.clone(), TYPES[p.letter.type].color); // 当たったら砕け散る
+  const att=p.letter.type;
+  const attacker = (p.owner==='player')?player:com;
+  const atkMul = attacker.buffs.atk>0?1.25:1;
+  const dmg=Math.round(LETTERS[p.letter.ch].dmg*atkMul);
+  // ガード判定：ガード中＆盾あり＆正面から
+  let blocked=false;
+  if(victim.guard && victim.shield){
+    // 飛んでくる弾が「自分の見ている方向」から来ていればガード成立
+    const center = isPlayer ? player.pos : com.mesh.position.clone().setY(1.5);
+    const toShooter = p.mesh.position.clone().sub(center).normalize(); // 自分→弾の向き
+    let fw;
+    if(isPlayer){ fw=aimDir(); } // プレイヤーのエイム方向
+    else { fw=new THREE.Vector3(Math.sin(com.yaw),0,Math.cos(com.yaw)); }
+    if(fw.dot(toShooter)>0.3){
+      blocked=true;
+      const base=matchupPct(att, victim.shield.type);
+      const defMul = victim.buffs.def>0?1.5:1; // 防御バフで盾が硬くなる
+      const pct=base>=100?100:(base/LETTERS[victim.shield.ch].def)/defMul;
+      victim.shieldHP-=pct;
+      if(base>=100||victim.shieldHP<=0){
+        victim.shieldHP=0; victim.shield=null;
+        if(isPlayer) setHand(handS,null); else setHand(com.handS,null);
+        showMsg(base>=100?'💥 相性◎！盾を一撃粉砕！！':'盾がくだけた！','#FFD24A');
+        sfx('break');
+      } else {
+        showMsg(base<=25?'相性✕…盾に25%だけ':'ガード！盾-'+Math.round(pct)+'%','#BFE7FF');
+        sfx('block');
+      }
+    }
+  }
+  if(!blocked){
+    const dmgFinal = Math.round(dmg * (victim.buffs.def>0?0.7:1)); // 防御バフで被ダメ軽減
+    victim.hp-=dmgFinal;
+    sfx('hit');
+    if(isPlayer){ flash(); showMsg('-'+dmgFinal+' くらった！','#FF8FA8'); }
+    else showMsg('ヒット！ -'+dmgFinal,'#A8FFC2');
+  }
+  updHP(); updSlots();
+  if(victim.hp<=0) endGame(!isPlayer);
+}
+
+// ============ 入力（PC） ============
+const keys={};
+addEventListener('keydown',e=>{keys[e.code]=true;
+  if(e.code==='KeyE') tryPick('weapon');
+  if(e.code==='KeyQ') tryPick('shield');});
+addEventListener('keyup',e=>keys[e.code]=false);
+let locked=false, paused=false;
+if(!IS_TOUCH){
+  renderer.domElement.addEventListener('click',()=>{ if(running&&!locked&&!paused) renderer.domElement.requestPointerLock(); });
+  document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===renderer.domElement;
+    if(!locked && running && !paused){ paused=true; player.guard=false; $('pauseOv').style.display='flex'; }});
+  $('btnResume').addEventListener('click',()=>{ $('pauseOv').style.display='none'; paused=false;
+    last=performance.now(); renderer.domElement.requestPointerLock(); });
+  addEventListener('mousemove',e=>{ if(!locked)return;
+    player.yaw-=e.movementX*.0024; player.pitch=Math.max(-1,Math.min(1,player.pitch-e.movementY*.0024)); });
+  addEventListener('mousedown',e=>{ if(!locked||!running)return;
+    if(e.button===2) playerThrow();
+    if(e.button===0) player.guard=true; });
+  addEventListener('mouseup',e=>{ if(e.button===0) player.guard=false; });
+  addEventListener('contextmenu',e=>e.preventDefault());
+}
+
+// ============ 入力（タッチ） ============
+let stickVec={x:0,y:0};
+if(IS_TOUCH){
+  $('btnThrow').style.display='block'; $('btnGuard').style.display='block'; $('stick').style.display='block';
+  const stick=$('stick'),knob=$('stickKnob'); let sid=null,sc={x:0,y:0};
+  stick.addEventListener('touchstart',e=>{const t=e.changedTouches[0];sid=t.identifier;
+    const r=stick.getBoundingClientRect();sc={x:r.left+55,y:r.top+55};e.preventDefault();},{passive:false});
+  stick.addEventListener('touchmove',e=>{for(const t of e.changedTouches){if(t.identifier!==sid)continue;
+    let dx=t.clientX-sc.x,dy=t.clientY-sc.y;const d=Math.hypot(dx,dy)||1,m=Math.min(d,42);
+    dx=dx/d*m;dy=dy/d*m;knob.style.transform=`translate(${dx}px,${dy}px)`;
+    stickVec={x:dx/42,y:dy/42};}e.preventDefault();},{passive:false});
+  const endS=e=>{for(const t of e.changedTouches){if(t.identifier===sid){sid=null;stickVec={x:0,y:0};knob.style.transform='';}}};
+  stick.addEventListener('touchend',endS); stick.addEventListener('touchcancel',endS);
+  // 右半分ドラッグで視点
+  let lid=null,lp={x:0,y:0};
+  addEventListener('touchstart',e=>{for(const t of e.changedTouches){
+    if(t.clientX>innerWidth*.42 && t.target===renderer.domElement && lid===null){lid=t.identifier;lp={x:t.clientX,y:t.clientY};}}},{passive:false});
+  addEventListener('touchmove',e=>{for(const t of e.changedTouches){if(t.identifier!==lid)continue;
+    player.yaw-=(t.clientX-lp.x)*.005; player.pitch=Math.max(-1,Math.min(1,player.pitch-(t.clientY-lp.y)*.005));
+    lp={x:t.clientX,y:t.clientY};}},{passive:false});
+  const endL=e=>{for(const t of e.changedTouches){if(t.identifier===lid)lid=null;}};
+  addEventListener('touchend',endL); addEventListener('touchcancel',endL);
+  $('btnThrow').addEventListener('touchstart',e=>{e.preventDefault();playerThrow();},{passive:false});
+  $('btnGuard').addEventListener('touchstart',e=>{e.preventDefault();player.guard=true;},{passive:false});
+  $('btnGuard').addEventListener('touchend',()=>player.guard=false);
+  $('btnPickW').addEventListener('touchstart',e=>{e.preventDefault();tryPick('weapon');},{passive:false});
+  $('btnPickS').addEventListener('touchstart',e=>{e.preventDefault();tryPick('shield');},{passive:false});
+}
+
+// ============ アクション ============
+function aimDir(){ return new THREE.Vector3(-Math.sin(player.yaw)*Math.cos(player.pitch),
+                                              Math.sin(player.pitch),
+                                             -Math.cos(player.yaw)*Math.cos(player.pitch)); }
+function camDir(){ return aimDir(); }
+function playerThrow(){
+  if(!player.weapon||!running) return;
+  const from=player.pos.clone().add(aimDir().multiplyScalar(1.2));
+  throwLetter('player', player.weapon, from, camDir());
+  player.weapon=null; setHand(handW,null); updSlots();
+}
+let nearLetter=null;
+function dropLetterAt(ch,type,dur,x,z){
+  const g=buildLetter(ch,type,FIELD_SCALE);
+  g.userData.vy=0; g.userData.dur=(dur===undefined?100:dur);
+  scene.add(g); fieldLetters.push(g);
+  landLetter(g,x,z);
+}
+function tryPick(slot){
+  if(!nearLetter||!running) return;
+  const px=nearLetter.position.x, pz=nearLetter.position.z;
+  const incoming={ch:nearLetter.userData.ch, type:nearLetter.userData.type, dur:nearLetter.userData.dur};
+  // 今持っているものを、拾う文字の場所に置く（被ダメは記憶したまま）
+  const prev = slot==='weapon' ? player.weapon : player.shield;
+  const prevDur = slot==='weapon' ? 100 : player.shieldHP;
+  // フィールドから拾う文字を除去
+  scene.remove(nearLetter); fieldLetters.splice(fieldLetters.indexOf(nearLetter),1);
+  // 装備
+  if(slot==='weapon'){ player.weapon=incoming; setHand(handW,incoming,0.21); }
+  else { player.shield=incoming; player.shieldHP=(incoming.dur===undefined?100:incoming.dur); setHand(handS,incoming,0.21,true); }
+  // 前の装備を地面へ（持っていれば）
+  if(prev){ dropLetterAt(prev.ch,prev.type,prevDur,px,pz); }
+  nearLetter=null; sfx('pick'); updSlots();
+}
+
+// ============ COM AI ============
+function comAI(dt){
+  com.timer-=dt;
+  const toPlayer=player.pos.clone().setY(0).sub(com.pos.clone().setY(0));
+  const dist=toPlayer.length();
+  com.yaw=Math.atan2(toPlayer.x,toPlayer.z);
+  com.mesh.rotation.y=com.yaw;
+  // ガード解除タイマー
+  if(com.guard){ com.guardT-=dt; if(com.guardT<=0) com.guard=false; }
+  let move=new THREE.Vector3();
+  if(!com.weapon||!com.shield){
+    // 一番近い文字へ
+    let best=null,bd=1e9;
+    for(const f of fieldLetters){ if(!f.userData.landed)continue;
+      const d=f.position.distanceTo(com.pos);if(d<bd){bd=d;best=f;}}
+    if(best){ move=best.position.clone().setY(0).sub(com.pos.clone().setY(0)).normalize();
+      if(bd<1.6){ const data={ch:best.userData.ch,type:best.userData.type,dur:best.userData.dur};
+        const bx=best.position.x, bz=best.position.z;
+        scene.remove(best); fieldLetters.splice(fieldLetters.indexOf(best),1);
+        if(!com.weapon){com.weapon=data; setHand(com.handW,data,0.18);}
+        else {com.shield=data; com.shieldHP=(data.dur===undefined?100:data.dur); setHand(com.handS,data,0.18);} } }
+  } else {
+    // まず、近くに宝石があれば（難易度の積極性に応じて）取りに行く
+    let gemTarget=null, gd=1e9;
+    if(DIFF.itemAggro>0){
+      for(const gm of gems){ if(!gm.userData.landed)continue;
+        const d=Math.hypot(gm.position.x-com.pos.x, gm.position.z-com.pos.z);
+        if(d<gd){gd=d;gemTarget=gm;} }
+      if(gemTarget && gd>DIFF.itemAggro) gemTarget=null; // 範囲外なら無視
+    }
+    // 距離キープ＆横移動（たまに立ち止まる）
+    com.moveT=(com.moveT||0)-dt;
+    if(com.moveT<=0){ com.moveOn=!com.moveOn;
+      com.moveT=com.moveOn?(1.0+Math.random()*1.5):(0.6+Math.random()*1.0); }
+    const side=new THREE.Vector3(-toPlayer.z,0,toPlayer.x).normalize().multiplyScalar(Math.sin(performance.now()*.0007)*1);
+    if(gemTarget){ // 宝石優先
+      move=new THREE.Vector3(gemTarget.position.x-com.pos.x,0,gemTarget.position.z-com.pos.z).normalize();
+    } else {
+      if(dist>11) move=toPlayer.clone().normalize();
+      else if(dist<5) move=toPlayer.clone().normalize().negate();
+      move.add(side).normalize();
+      if(!com.moveOn) move.set(0,0,0);
+    }
+    // 投げる（命中率ひかえめ）
+    if(com.timer<=0 && dist<22){
+      const eye=com.pos.clone().add(new THREE.Vector3(0,1.5,0));
+      const tgt=player.pos.clone().add(new THREE.Vector3((Math.random()-.5)*DIFF.aim,(Math.random()-.5)*DIFF.aim*0.45,(Math.random()-.5)*DIFF.aim));
+      const dir=tgt.sub(eye); const fl=dir.length();
+      dir.normalize(); dir.y += fl*.012; dir.normalize(); // 重力ぶん上方補正
+      throwLetter('com', com.weapon, eye, dir);
+      com.weapon=null; setHand(com.handW,null);
+      com.timer=DIFF.throwMin+Math.random()*DIFF.throwRand;
+    }
+  }
+  com.pos.add(move.multiplyScalar(dt*2.6*DIFF.moveMul*(com.buffs.speed>0?1.5:1)));
+  const r=Math.hypot(com.pos.x,com.pos.z); if(r>ARENA_R-1){com.pos.x*= (ARENA_R-1)/r; com.pos.z*=(ARENA_R-1)/r;}
+  com.mesh.position.copy(com.pos);
+}
+
+// ============ ゲームループ ============
+let running=false, last=performance.now(), spawnTimer=2.5, gemTimer=6;
+function endGame(playerWon){
+  running=false;
+  $('endTitle').textContent = playerWon?'🏆 WIN!':'😵 LOSE...';
+  $('endTxt').textContent = playerWon?'COMくんに勝った！すごい！🎉':'次はタイプ相性で盾を砕こう…！';
+  $('endOv').style.display='flex';
+  if(document.pointerLockElement) document.exitPointerLock();
+}
+function loop(){
+  requestAnimationFrame(loop);
+  const now=performance.now(); let dt=Math.min(.05,(now-last)/1000); last=now;
+  if(paused){ renderer.render(scene,camera); return; }
+  // フィールドのアルファベットを一定数キープ（足りなければ降らせる）
+  spawnTimer-=dt;
+  if(spawnTimer<=0){ spawnTimer=2.5;
+    if(fieldLetters.length<14) spawnFieldLetter(); }
+  // 落下中の文字
+  for(const f of fieldLetters){ if(f.userData.landed) continue;
+    f.userData.vy+=GRAV*dt; f.position.y+=f.userData.vy*dt; f.rotation.y+=dt*2;
+    if(f.position.y<=FIELD_SCALE*0.6){ landLetter(f,f.position.x,f.position.z); sfx('land'); } }
+  // 砕け破片
+  for(let i=parts.length-1;i>=0;i--){const q=parts[i]; q.life-=dt; q.vel.y+=GRAV*dt;
+    q.m.position.addScaledVector(q.vel,dt); q.m.scale.multiplyScalar(.94);
+    if(q.life<=0){scene.remove(q.m);parts.splice(i,1);} }
+  if(!running){ renderer.render(scene,camera); return; }
+
+  // 宝石アイテムの出現（中央付近にときどき降ってくる）
+  gemTimer-=dt;
+  if(gemTimer<=0){ gemTimer=9+Math.random()*5; if(gems.length<3) spawnGem(); }
+  // 宝石の落下→目線位でホバリング・ゆっくり回転・取得
+  const HOVER=1.5; // キャラの目線あたり
+  for(let i=gems.length-1;i>=0;i--){ const gm=gems[i];
+    if(!gm.userData.landed){ gm.userData.vy+=GRAV*dt; gm.position.y+=gm.userData.vy*dt;
+      if(gm.position.y<=HOVER){ gm.position.y=HOVER; gm.userData.landed=true; sfx('land'); } }
+    else { gm.userData.bob+=dt*1.4; gm.position.y=HOVER+Math.sin(gm.userData.bob)*0.18; }
+    gm.rotation.y+=dt*0.9; // ゆっくり輝きながら回転
+    // きらめき（芯の明滅）
+    const core=gm.children[2]; if(core) core.material.opacity=0.6+Math.abs(Math.sin(gm.userData.bob*1.5))*0.4;
+    // 取得判定（プレイヤー or COM）
+    const grabber = gm.position.distanceTo(new THREE.Vector3(player.pos.x,gm.position.y,player.pos.z))<1.4 ? player
+                  : gm.position.distanceTo(new THREE.Vector3(com.pos.x,gm.position.y,com.pos.z))<1.4 ? com : null;
+    if(grabber){ const k=gm.userData.kind;
+      grabber.buffs[k]=GEMS[k].dur;
+      if(grabber===player){ chime([1047,1319,1568,2093],0.12); showMsg(GEMS[k].emoji+' '+GEMS[k].label+'！',GEMS[k].css); }
+      else chime([784,988,1175],0.08);
+      scene.remove(gm); gems.splice(i,1); }
+  }
+  // バフのカウントダウン
+  for(const ow of [player,com]) for(const k of GKEYS){ if(ow.buffs[k]>0){ ow.buffs[k]-=dt; if(ow.buffs[k]<0) ow.buffs[k]=0; } }
+  updBuffHUD();
+
+  // プレイヤー移動
+  let mx=0,mz=0;
+  if(IS_TOUCH){ mx=stickVec.x; mz=stickVec.y; }
+  else { mz=(keys.KeyW?-1:0)+(keys.KeyS?1:0); mx=(keys.KeyD?1:0)+(keys.KeyA?-1:0); }
+  const spd=(player.guard?5.2*0.40:5.2)*(player.buffs.speed>0?1.5:1);
+  const fw=new THREE.Vector3(-Math.sin(player.yaw),0,-Math.cos(player.yaw));
+  const rt=new THREE.Vector3(-fw.z,0,fw.x); // 視点基準の右ベクトル
+  player.pos.add(fw.clone().multiplyScalar(-mz*spd*dt)).add(rt.clone().multiplyScalar(mx*spd*dt));
+  const pr=Math.hypot(player.pos.x,player.pos.z);
+  if(pr>ARENA_R-1){player.pos.x*=(ARENA_R-1)/pr;player.pos.z*=(ARENA_R-1)/pr;}
+  // プレイヤーキャラの配置（player.pos は目線基準なので足元へ変換）
+  const feet=player.pos.clone(); feet.y=0;
+  playerMesh.position.copy(feet);
+  playerMesh.rotation.y=player.yaw+Math.PI; // 顔を前方へ
+
+  // TPSカメラ：キャラの真後ろ上方からエイム方向を見る（中央配置）
+  const aim=new THREE.Vector3(-Math.sin(player.yaw),0,-Math.cos(player.yaw)); // 前方(水平)
+  const look=new THREE.Vector3(-Math.sin(player.yaw)*Math.cos(player.pitch),
+                                Math.sin(player.pitch),
+                               -Math.cos(player.yaw)*Math.cos(player.pitch)); // エイム(上下込み)
+  const headPos=player.pos.clone(); // 目線高さ
+  const camPos=headPos.clone().addScaledVector(aim,-3.2).add(new THREE.Vector3(0,1.0,0));
+  const cr=Math.hypot(camPos.x,camPos.z); if(cr>ARENA_R+4){camPos.x*=(ARENA_R+4)/cr;camPos.z*=(ARENA_R+4)/cr;}
+  camera.position.lerp(camPos,0.4);
+  const focus=headPos.clone().addScaledVector(look,6);
+  camera.lookAt(focus);
+
+  // 自キャラが視界をふさぐ時に薄くする
+  {
+    const pv=playerMesh.position.clone(); pv.y=1.4;
+    const cv=com.mesh.position.clone(); cv.y=1.4;
+    const ps=pv.clone().project(camera);
+    const cs=cv.clone().project(camera);
+    // 相手が画面上で自キャラと近い位置（＝後ろに隠れがち）。距離に関係なく効く
+    const bothFront = ps.z<1 && cs.z<1;
+    const overlap = bothFront && Math.abs(ps.x-cs.x)<0.30 && Math.abs(ps.y-cs.y)<0.55;
+    // 見上げ／見下ろしで体が視界に大きくせり出す時
+    const pitchBlock = Math.abs(player.pitch)>0.45;
+    const fade = overlap || pitchBlock;
+    playerMesh.traverse(o=>{ if(o.material){ o.material.transparent=true;
+      o.material.opacity += ((fade?0.45:1.0)-o.material.opacity)*0.3; } });
+  }
+
+  // 盾の構え演出（キャラのローカル空間：前方に掲げる）
+  handS.position.lerp(player.guard?new THREE.Vector3(0,1.3,0.95):new THREE.Vector3(.7,1.15,.4),.25);
+  handS.scale.setScalar(1);
+  handW.rotation.y+= dt*2;
+
+  // 拾える文字
+  nearLetter=null; let nd=3.8;
+  for(const f of fieldLetters){ if(!f.userData.landed)continue;
+    const d=f.position.distanceTo(player.pos);if(d<nd){nd=d;nearLetter=f;}}
+  const tip=$('pickupTxt');
+  if(nearLetter){ const u=nearLetter.userData, st=LETTERS[u.ch];
+    tip.style.display='inline-block';
+    tip.innerHTML=`${TYPES[u.type].emoji} <b style="color:${TYPES[u.type].css}">${u.ch}</b>：${st.trait}` +
+      (IS_TOUCH?'':'<br><b>E</b>=武器に / <b>Q</b>=盾に');
+    nearLetter.scale.setScalar(1.18);
+    if(IS_TOUCH){$('btnPickW').style.display='block';$('btnPickS').style.display='block';}
+  } else { tip.style.display='none';
+    if(IS_TOUCH){$('btnPickW').style.display='none';$('btnPickS').style.display='none';}
+    for(const f of fieldLetters) f.scale.setScalar(1); }
+
+  // COM
+  comAI(dt);
+  // COM盾の構え
+  com.handS.position.lerp(com.guard?new THREE.Vector3(0,1.3,0.6):new THREE.Vector3(.7,1.15,.4),.2);
+  com.handS.scale.setScalar(1);
+
+  // 投擲物
+  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];
+    p.t+=dt; p.life-=dt;
+    p.vel.y+=GRAV*dt;
+    p.vel.multiplyScalar(1-p.drag*dt*3);
+    if(p.sCurve) p.vel.add(new THREE.Vector3(Math.cos(p.t*6)*p.sCurve*8*dt,0,0));
+    p.mesh.position.addScaledVector(p.vel,dt);
+    p.mesh.rotation.x+=dt*7; p.mesh.rotation.y+=dt*5;
+    // COMのガード反応：プレイヤー弾が接近したら
+    if(p.owner==='player' && com.shield && !com.guard &&
+       p.mesh.position.distanceTo(com.pos)<11 && Math.random()<DIFF.guardP){ com.guard=true; com.guardT=1.1; }
+    // 当たり判定
+    if(p.owner==='player'){
+      const cc=com.pos.clone().add(new THREE.Vector3(0,1.3,0));
+      if(p.mesh.position.distanceTo(cc)<1.25){ resolveHit(p,com,false); scene.remove(p.mesh); projectiles.splice(i,1); continue; }
+    } else {
+      if(p.mesh.position.distanceTo(player.pos)<1.05){ resolveHit(p,player,true); scene.remove(p.mesh); projectiles.splice(i,1); continue; }
+    }
+    if(p.mesh.position.y<0.18){ // 外れた→落下地点に転がって残る
+      let lx=p.mesh.position.x, lz=p.mesh.position.z;
+      const lr=Math.hypot(lx,lz); if(lr>ARENA_R-1){lx*=(ARENA_R-1)/lr;lz*=(ARENA_R-1)/lr;}
+      landLetter(p.mesh,lx,lz); fieldLetters.push(p.mesh); sfx('land');
+      projectiles.splice(i,1); continue; }
+    if(p.life<=0){ scene.remove(p.mesh); projectiles.splice(i,1); }
+  }
+  renderer.render(scene,camera);
+}
+loop();
+
+// ============ スタート ============
+$('ctrlTxt').innerHTML = IS_TOUCH
+ ? '🕹️ 左スティック：移動　／　右半分ドラッグ：視点<br>「なげる」「ガード(長押し)」、文字の近くで「拾う」！'
+ : '🖱️ クリックで視点ロック　WASD：移動<br>右クリック：投げる　左クリック長押し：ガード<br>文字の近くで E=武器 / Q=盾<br><small>※対戦中はマウスが画面に固定されます。<b>ESC</b>で解放、クリックで再開</small>';
+// 難易度選択
+const diffBtns=document.querySelectorAll('.diffbtn');
+function selectDiff(key){ DIFF=DIFFS[key];
+  diffBtns.forEach(b=>b.classList.toggle('sel', b.dataset.d===key)); }
+diffBtns.forEach(b=>b.addEventListener('click',()=>{ selectDiff(b.dataset.d); sfx('pick'); }));
+selectDiff('normal'); // 初期は「ふつう」
+
+$('btnStart').addEventListener('click',()=>{
+  $('titleOv').style.display='none'; running=true; sfx('pick');
+  if(!IS_TOUCH) renderer.domElement.requestPointerLock();
+});
+updSlots(); updHP();
+})();
+</script>
+</body>
+</html>
