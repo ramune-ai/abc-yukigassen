@@ -108,12 +108,14 @@
   }
   /* キャラ・持ち物の上に出すHP表示（3D位置に合わせて毎フレーム動かす） */
   #wlabels{position:fixed;inset:0;pointer-events:none;z-index:9;}
-  .wl{position:absolute;left:0;top:0;display:none;transform:translate(-50%,-100%);transform-origin:0 0;white-space:nowrap;
-    background:rgba(255,255,255,.88);border-radius:9px;padding:2px 6px 3px;box-shadow:0 1px 4px rgba(0,0,0,.18);text-align:center;}
-  .wl .wt{display:block;font-size:11px;font-weight:900;line-height:1.15;color:#555;}
-  .wl .wb{display:block;width:46px;height:5px;margin:2px auto 0;border-radius:3px;background:rgba(0,0,0,.12);overflow:hidden;}
+  /* 背景なし・1行（属性アイコン／数値／バー）。うしろの相手が隠れないように細く */
+  .wl{position:absolute;left:0;top:0;display:none;align-items:center;gap:3px;transform-origin:0 0;white-space:nowrap;line-height:1;}
+  .wl .wi{font-size:11px;filter:drop-shadow(0 0 1px rgba(0,0,0,.5));}
+  .wl .wt{font-size:11px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;
+    text-shadow:0 0 2px rgba(0,0,0,.7),0 1px 2px rgba(0,0,0,.6);}
+  .wl .wb{display:block;width:36px;height:5px;border-radius:3px;background:rgba(0,0,0,.28);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.7);}
   .wl .wb b{display:block;height:100%;border-radius:3px;}
-  .wl.head .wb{width:64px;height:7px;} .wl.head .wt{font-size:12px;}
+  .wl.head .wb{width:46px;height:6px;} .wl.head .wt,.wl.head .wi{font-size:12px;}
   .padbtn{border:none;border-radius:calc(var(--padbtn) * .24);font-weight:900;color:#fff;font-size:calc(var(--padbtn) * .21);
     box-shadow:0 3px 10px rgba(0,0,0,.22);touch-action:none;-webkit-tap-highlight-color:transparent;padding:0;
     display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;font-family:inherit;
@@ -1286,33 +1288,34 @@ function updNearArrow(){
 // キャラの頭上にHP、持っている文字の上に耐久（残りHP）を出す
 const WL={};
 function mkWL(key,cls){ const d=document.createElement('div'); d.className='wl '+(cls||'');
-  d.innerHTML='<span class="wt"></span><i class="wb"><b></b></i>'; $('wlabels').appendChild(d); WL[key]=d; d._t=''; return d; }
+  d.innerHTML='<span class="wi"></span><span class="wt"></span><i class="wb"><b></b></i>'; $('wlabels').appendChild(d); WL[key]=d; d._t=''; d._i=''; return d; }
 mkWL('pHead','head'); mkWL('cHead','head'); mkWL('pW'); mkWL('pS'); mkWL('cW'); mkWL('cS');
 const _w=new THREE.Vector3(), _up=new THREE.Vector3();
-function placeWL(el, obj, dy, text, pct, col){
+// 1行表示：アイコン（頭上は❤/⛄、持ち物は属性）＋「残り/100」＋バー
+function placeWL(el, obj, dy, icon, text, pct, col){
   if(!obj){ el.style.display='none'; return; }
   obj.getWorldPosition(_w); _w.y+=dy;
   _up.copy(_w).applyMatrix4(camera.matrixWorldInverse);
   if(_up.z>-0.5){ el.style.display='none'; return; } // カメラの後ろ／近すぎ
   const dist=-_up.z, sc=Math.max(0.6,Math.min(1,7/dist)); // 遠いほど小さく
   _w.project(camera);
-  el.style.display='block'; el.style.zIndex=String(1000-Math.round(dist*10)); // 近いものを手前に
+  el.style.display='flex'; el.style.zIndex=String(1000-Math.round(dist*10)); // 近いものを手前に
   el.style.transform=`translate(${(_w.x+1)/2*innerWidth}px,${(1-_w.y)/2*innerHeight}px) scale(${sc}) translate(-50%,-100%)`; // 下中央を基準に縮める
   if(el._t!==text){ el._t=text; el.querySelector('.wt').textContent=text; }
+  if(el._i!==icon){ el._i=icon; el.querySelector('.wi').textContent=icon; }
   const b=el.querySelector('.wb b'); b.style.width=Math.max(0,Math.min(100,pct))+'%'; b.style.background=col;
 }
 const durOf=l=>l?(l.dur===undefined?100:Math.max(0,Math.round(l.dur))):0;
 function updWorldLabels(){
   if(!running){ for(const k in WL) WL[k].style.display='none'; return; }
   const ph=Math.max(0,Math.round(player.hp)), ch=Math.max(0,Math.round(com.hp));
-  placeWL(WL.pHead, playerMesh, 2.35, '❤ '+ph, ph, '#FF5D8F');
-  placeWL(WL.cHead, com.mesh, 2.35, '⛄ '+ch, ch, '#8E6CF0');
-  // 手の文字：たまも耐久を覚えている（左右こうかんでバリアにした時の残りHP）
-  const lab=(l,hp,isS)=>[(isS?'🛡':'●')+' '+hp+'%', hp, TYPES[l.type].css];
-  const hs=[['pW',handW,player.weapon,durOf(player.weapon),false],['pS',handS,player.shield,Math.round(player.shieldHP),true],
-            ['cW',com.handW,com.weapon,durOf(com.weapon),false],['cS',com.handS,com.shield,Math.round(com.shieldHP),true]];
-  for(const [k,obj,l,hp,isS] of hs){ if(!l){ WL[k].style.display='none'; continue; }
-    const [t,p,c]=lab(l,Math.max(0,hp),isS); placeWL(WL[k], obj, 0.72, t, p, c); }
+  placeWL(WL.pHead, playerMesh, 2.3, '❤', ph+'/100', ph, '#FF5D8F');
+  placeWL(WL.cHead, com.mesh, 2.3, '⛄', ch+'/100', ch, '#8E6CF0');
+  // 手の文字：属性アイコン＋耐久（たまも耐久を覚えている＝左右こうかんでバリアにした時の残りHP）
+  const hs=[['pW',handW,player.weapon,durOf(player.weapon)],['pS',handS,player.shield,Math.round(player.shieldHP)],
+            ['cW',com.handW,com.weapon,durOf(com.weapon)],['cS',com.handS,com.shield,Math.round(com.shieldHP)]];
+  for(const [k,obj,l,hp] of hs){ if(!l){ WL[k].style.display='none'; continue; }
+    const v=Math.max(0,hp); placeWL(WL[k], obj, 0.68, TYPES[l.type].emoji, v+'/100', v, TYPES[l.type].css); }
 }
 
 // ガード中の足元リング（プレイヤー・COM）
@@ -1740,8 +1743,8 @@ function startGame(practice){
   for(const k in STATS) STATS[k]=0; STATS.t0=performance.now();
   $('floatBtns').style.display='flex'; document.body.classList.add('playing'); // ⏸（と🧰）は右上
   if(IS_TOUCH) $('pauseTxt').textContent='ひと休み。盤面をよく見て作戦を立てよう';
-  else if(!practice){ const p=renderer.domElement.requestPointerLock(); if(p&&p.catch) p.catch(()=>{}); } // 自動開始時は失敗してもOK（画面クリックで固定）
-  if(practice){ pauseGame(false); openGuide('prac'); } // まずは使い方を見せる（閉じるとマウス固定して開始）
+  else { const p=renderer.domElement.requestPointerLock(); if(p&&p.catch) p.catch(()=>{}); } // 自動開始時は失敗してもOK（画面クリックで固定）
+  // れんしゅう場は説明なしですぐフィールドへ（使い方は🧰／Tabの「れんしゅう」タブにある）
 }
 $('btnPractice').addEventListener('click',()=>startGame(true));
 // リザルトの「もう一回！」から来た時は、同じ強さですぐ始める
