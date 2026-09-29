@@ -72,7 +72,7 @@
   #pickupTip{top:var(--hudBottom, 168px);left:0;right:0;text-align:center;padding:0 16px;}
   #pickupTip .inner{display:inline-block;max-width:min(560px, 100%);box-sizing:border-box;background:rgba(255,255,255,.88);border-radius:16px;
     padding:clamp(6px, 1.4vmin, 9px) clamp(12px, 2.8vmin, 18px);font-size:clamp(15px, 3.2vmin, 19px);font-weight:bold;color:#444;box-shadow:0 2px 8px rgba(0,0,0,.15);line-height:1.45;}
-  /* touch UI：右下に縦1列（上から なげる／左右こうかん／バリア）。左利き設定で左側へ */
+  /* touch UI：右下に縦1列（上から なげる／ぼうぎょ／左右こうかん）。左利き設定で左側へ */
   #pad{position:fixed;z-index:20;right:calc(var(--sar) + 14px);bottom:calc(var(--sab) + 16px);
     display:grid;grid-template-columns:var(--padw);grid-template-rows:repeat(3,var(--padbtn));gap:var(--padgap);}
   :root{--padw:calc(var(--padbtn) * 1.3);}
@@ -91,11 +91,17 @@
   body.lefty #pad{right:auto;left:calc(var(--sal) + 14px);}
   body.lefty #stick{left:auto;right:calc(var(--sar) + 24px);}
   body.lefty #floatBtns{flex-direction:row-reverse;}
-  /* 対戦中の小ボタン（⏸・🧰）：ボタン列のとなり（上端にそろえる） */
-  #floatBtns{position:fixed;z-index:22;right:calc(var(--sar) + 26px + var(--padw));
-    bottom:calc(var(--sab) + 16px + var(--padbtn) * 3 + var(--padgap) * 2 - 106px);display:none;flex-direction:column;gap:10px;}
-  body.lefty #floatBtns{right:auto;left:calc(var(--sal) + 26px + var(--padw));}
-  body.aiming #floatBtns{visibility:hidden;} /* ねらい中は✕キャンセルと重ならないように隠す */
+  /* 対戦中の小ボタン（⏸・🧰）：いつも右上。HUDはその分だけ左に寄せる */
+  #floatBtns{position:fixed;z-index:22;right:calc(var(--sar) + 10px);top:calc(var(--sat) + 8px);display:none;gap:8px;}
+  body.playing #hpWrap{padding-right:calc(var(--sar) + 14px + 56px);}
+  body.playing.practice #hpWrap{padding-right:calc(var(--sar) + 14px + 112px);}
+  /* いちばん近い文字の方向（画面外にある時だけ、画面のはしに矢印） */
+  #nearArrow{position:fixed;z-index:9;left:0;top:0;width:54px;height:54px;margin:-27px 0 0 -27px;display:none;pointer-events:none;}
+  #nearArrow .ar{position:absolute;inset:0;}
+  #nearArrow .ar:before{content:"";position:absolute;right:-6px;top:50%;margin-top:-11px;border-left:16px solid currentColor;border-top:11px solid transparent;border-bottom:11px solid transparent;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));}
+  #nearArrow .lt{position:absolute;inset:6px;border-radius:50%;background:rgba(255,255,255,.92);border:3px solid currentColor;box-sizing:border-box;
+    display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.2);}
   .fbtn{width:48px;height:48px;border-radius:50%;border:2px solid #fff;background:rgba(255,255,255,.6);color:#555;
     font-size:20px;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.15);touch-action:none;-webkit-tap-highlight-color:transparent;font-family:inherit;}
   /* overlays */
@@ -331,7 +337,7 @@
       <div class="btnRow" id="dummyShield" style="margin-top:4px">
         <button class="pill" data-t="">なし</button>
         <button class="pill" data-t="fire" style="color:#F52A2A">🔥 赤</button>
-        <button class="pill" data-t="grass" style="color:#3FA94C">🌿 緑</button>
+        <button class="pill" data-t="grass" style="color:#138A2E">🌿 緑</button>
         <button class="pill" data-t="water" style="color:#1E9BE0">💧 青</button>
       </div>
       <p>相性で勝ってる色のたまを当てると、バリアが一撃でこわれるのを確かめてみよう。</p>
@@ -376,7 +382,7 @@
         </g>
         <g text-anchor="middle" font-weight="bold">
           <circle cx="160" cy="45" r="34" fill="#FFE3E3" stroke="#F52A2A" stroke-width="3"/><text x="160" y="42" font-size="24">🔥</text><text x="160" y="64" font-size="13" fill="#F52A2A">赤</text>
-          <circle cx="255" cy="190" r="34" fill="#E2F7E4" stroke="#4FC95D" stroke-width="3"/><text x="255" y="187" font-size="24">🌿</text><text x="255" y="209" font-size="13" fill="#3FA94C">緑</text>
+          <circle cx="255" cy="190" r="34" fill="#DDF3E1" stroke="#179A35" stroke-width="3"/><text x="255" y="187" font-size="24">🌿</text><text x="255" y="209" font-size="13" fill="#138A2E">緑</text>
           <circle cx="65" cy="190" r="34" fill="#DFF3FF" stroke="#2FB6FF" stroke-width="3"/><text x="65" y="187" font-size="24">💧</text><text x="65" y="209" font-size="13" fill="#1E9BE0">青</text>
         </g>
       </svg>
@@ -396,7 +402,7 @@
     <div class="gpage" data-p="abc">
       <div class="typeSel" id="spawnType">
         <button data-t="fire" style="color:#F52A2A">🔥 赤</button>
-        <button data-t="grass" style="color:#3FA94C">🌿 緑</button>
+        <button data-t="grass" style="color:#138A2E">🌿 緑</button>
         <button data-t="water" style="color:#1E9BE0">💧 青</button>
       </div>
       <div class="gbox" style="font-size:13px;line-height:1.6">
@@ -418,6 +424,7 @@
 </div>
 
 <!-- スマホ：対戦中の小ボタン -->
+<div id="nearArrow"><div class="ar"></div><div class="lt"></div></div>
 <div id="floatBtns">
   <button class="fbtn" id="btnMenu" aria-label="きゅうけい">⏸</button>
   <button class="fbtn practiceOnlyBtn" id="btnTools" aria-label="ずかん・文字をだす" style="display:none">🧰</button>
@@ -425,8 +432,8 @@
 
 <div id="pad" style="display:none">
   <button class="padbtn" id="btnThrow">なげる</button>
-  <button class="padbtn" id="btnSwap">⇄<br>左右こうかん</button>
   <button class="padbtn" id="btnGuard">ぼうぎょ</button>
+  <button class="padbtn" id="btnSwap">⇄<br>左右こうかん</button>
 </div>
 <div id="stick" style="display:none"><div id="stickKnob"></div></div>
 
@@ -472,7 +479,7 @@ const PICK = {
 // タイプ：fire / grass / water
 const TYPES = {
   fire :{color:0xF52A2A, css:'#F52A2A', emoji:'🔥', name:'炎'},
-  grass:{color:0x4FC95D, css:'#4FC95D', emoji:'🌿', name:'草'},
+  grass:{color:0x0C7A22, css:'#179A35', emoji:'🌿', name:'草'}, // 水色と見分けやすい濃い緑（3Dは明るく出るので暗めに指定）
   water:{color:0x2FB6FF, css:'#2FB6FF', emoji:'💧', name:'水'},
 };
 const BEATS = {fire:'grass', grass:'water', water:'fire'}; // key が value に強い
@@ -512,13 +519,13 @@ const FONT = {
 // そこから、ダメージ・弾速・空気抵抗・ふらつき・盾の強さを計算する
 const PHYS = {
   dmgMin:21, dmgMax:28,     // 軽い→重い ダメージ
-  spdMax:27, spdMin:21,     // 軽い→重い 投げた時の速さ
-  dragMax:.13, dragMin:.06, // 軽い→重い 空気抵抗（軽いほど受けやすい）
+  spdMax:24, spdMin:20.5,   // 軽い→重い 投げた時の速さ（軽くても飛びすぎないよう上限を抑えた）
+  dragMax:.17, dragMin:.07, // 軽い→重い 空気抵抗（軽いほど受けやすい＝遠くで失速）
   defMin:.6, defMax:1.3,    // すきま多い→少ない 盾の強さ
 };
 const WOBBLE = {  // ふらつきの強さ（ふらつき0〜1に掛ける）
-  aimJitter: .10, // 投げた瞬間のズレ
-  flutter: 14,    // 飛行中のゆらゆらの強さ
+  aimJitter: .07, // 投げた瞬間のズレ
+  flutter: 10,    // 飛行中のゆらゆらの強さ
   freq: 7,        // ゆらゆらの速さ
 };
 const LETTERS = {};
@@ -622,10 +629,10 @@ const SPHERE = new THREE.SphereGeometry(1,16,16);
 const CYL = new THREE.CylinderGeometry(1,1,1,14);
 function buildLetter(ch, type, scale=0.32, opts={}){
   const g = new THREE.Group();
-  let col=TYPES[type].color;
-  if(opts.barrier){ // バリアは「明るく薄めた色」で不透明（透けないのでボコボコ・内部表示が出ない）
-    const c=new THREE.Color(col); c.lerp(new THREE.Color(0xffffff),0.45); col=c.getHex(); }
+  const col=TYPES[type].color;
   const mat = new THREE.MeshStandardMaterial({color:col, roughness:0.42, metalness:0.05});
+  // 手に持った文字（たま・バリア）は、薄く見えないよう少しだけ自分で光らせて色をはっきり出す
+  if(opts.held) mat.emissive.setHex(col).multiplyScalar(0.22);
   const rows = FONT[ch];
   const has=(x,y)=> x>=0&&x<5&&y>=0&&y<7&&rows[y][x]==='1';
   const RAD = scale*0.46;      // 球＝円柱の半径を一致させて段差をなくす
@@ -645,7 +652,6 @@ function buildLetter(ch, type, scale=0.32, opts={}){
   g.userData={ch,type};
   return g;
 }
-function buildShieldPanel(ch, type, scale){ return buildLetter(ch,type,scale,{barrier:true}); }
 
 // ============ フィールドの文字（空から降ってくる） ============
 const fieldLetters=[];
@@ -733,8 +739,8 @@ let PRACTICE=false, dummyType=''; // れんしゅうモード／練習相手に�
 
 // COMの見た目（雪だるま⛄ 紫マフラー）
 { const g=buildSnowman(0x8E6CF0, false);
-  com.handW=new THREE.Group(); com.handW.position.set(-.7,1.15,.4); g.add(com.handW);
-  com.handS=new THREE.Group(); com.handS.position.set(.7,1.15,.4); g.add(com.handS);
+  com.handW=new THREE.Group(); com.handW.position.set(-1.15,1.2,.25); g.add(com.handW);
+  com.handS=new THREE.Group(); com.handS.position.set(1.15,1.2,.25); g.add(com.handS);
   com.mesh=g; scene.add(g); }
 
 // プレイヤーの見た目（雪だるま⛄ 虹のマフラー）
@@ -771,18 +777,20 @@ function buildSnowman(scarfCol, isPlayer){
   cols.forEach((c,i)=>{ const r=new THREE.Mesh(new THREE.TorusGeometry(0.4-i*0.02,0.05,8,20),
     new THREE.MeshStandardMaterial({color:c,roughness:0.5})); r.position.y=1.16+i*0.03; r.rotation.x=Math.PI/2.2; g.add(r); });
   playerMesh.add(g);
-  playerMesh.userData.handW=new THREE.Group(); playerMesh.userData.handW.position.set(-.7,1.15,.4); g.add(playerMesh.userData.handW);
-  playerMesh.userData.handS=new THREE.Group(); playerMesh.userData.handS.position.set(.7,1.15,.4); g.add(playerMesh.userData.handS);
+  playerMesh.userData.handW=new THREE.Group(); playerMesh.userData.handW.position.set(-1.15,1.2,.25); g.add(playerMesh.userData.handW);
+  playerMesh.userData.handS=new THREE.Group(); playerMesh.userData.handS.position.set(1.15,1.2,.25); g.add(playerMesh.userData.handS);
   scene.add(playerMesh);
 }
 const handW=playerMesh.userData.handW;
 const handS=playerMesh.userData.handS;
 scene.add(camera);
 
-function setHand(group, letter, scale, transparent){ group.clear();
-  if(letter){
-    const g = transparent ? buildShieldPanel(letter.ch,letter.type,scale) : buildLetter(letter.ch,letter.type,scale);
-    group.add(g);} }
+// 手に持つ文字：体にめりこまない大きさ・位置（雪だるまの横に少し離して持つ）
+const HELD_SCALE=0.16;
+const HAND_W=new THREE.Vector3(-1.15,1.2,.25), HAND_S=new THREE.Vector3(1.15,1.2,.25); // たま（右手）／バリア（左手）
+const GUARD_POS=new THREE.Vector3(0,1.3,1.05); // ガード中はバリアを体の前へ
+function setHand(group, letter){ group.clear();
+  if(letter) group.add(buildLetter(letter.ch,letter.type,HELD_SCALE,{held:true})); }
 
 // ============ HUD ============
 const $=id=>document.getElementById(id);
@@ -881,6 +889,9 @@ function sfx(kind){ const ac=audioReady(); if(!ac) return; try{
   if(kind==='block'){o.type='square';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(150,t+.2);}
   if(kind==='break'){o.type='sawtooth';o.frequency.setValueAtTime(600,t);o.frequency.exponentialRampToValueAtTime(80,t+.3);}
   if(kind==='hit'){o.type='sine';o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(60,t+.25);}
+  // 自分がくらった：にごった音で「ぶぇ〜ん」と下がる（残念な感じ）
+  if(kind==='hurt'){o.type='square';g.gain.setValueAtTime(.09,t);g.gain.exponentialRampToValueAtTime(.001,t+.45);
+    o.frequency.setValueAtTime(330,t);o.frequency.exponentialRampToValueAtTime(90,t+.42);o.start(t);o.stop(t+.5);return;}
   if(kind==='pick'){o.type='triangle';o.frequency.setValueAtTime(700,t);o.frequency.exponentialRampToValueAtTime(1200,t+.12);}
   if(kind==='land'){o.type='triangle';g.gain.setValueAtTime(.05,t);o.frequency.setValueAtTime(260,t);o.frequency.exponentialRampToValueAtTime(120,t+.12);}
   o.start(t); o.stop(t+.3);}catch(e){} }
@@ -951,7 +962,7 @@ function resolveHit(p, victim, isPlayer){
         victim.shieldHP=0; victim.shield=null;
         if(isPlayer) setHand(handS,null); else setHand(com.handS,null);
         showMsg(base>=100?'💥 相性◎！バリアを一撃粉砕！！':'バリアがくだけた！','#FFD24A');
-        sfx('break');
+        sfx('break'); if(!isPlayer) chime([1047,1319,1568,2093],0.1,0.05); // 相手のバリアをこわした時はキラキラも
       } else {
         showMsg(base<=25?'相性✕…バリアに25%だけ':'ガード！バリア-'+Math.round(pct)+'%','#BFE7FF');
         sfx('block');
@@ -961,7 +972,8 @@ function resolveHit(p, victim, isPlayer){
   if(!blocked){
     const dmgFinal = Math.round(dmg * (victim.buffs.def>0?0.7:1)); // 防御バフで被ダメ軽減
     victim.hp-=dmgFinal;
-    sfx('hit');
+    // 当てた時はうれしい上がり音「ピコーン！」、くらった時は残念な下がり音
+    if(isPlayer) sfx('hurt'); else { sfx('hit'); chime([1319,1976],0.13,0.08); }
     if(isPlayer){ flash(); showMsg('-'+dmgFinal+' くらった！','#FF8FA8'); }
     else showMsg('ヒット！ -'+dmgFinal,'#A8FFC2');
   }
@@ -1128,6 +1140,29 @@ const targetMark=new THREE.Group();
   targetMark.userData.setColor=c=>mat.color.setHex(c);
   targetMark.visible=false; scene.add(targetMark); }
 
+// いちばん近い文字が画面の外（後ろ・横）にある時、画面のはしに矢印で方向を出す
+const _v=new THREE.Vector3();
+function updNearArrow(){
+  const el=$('nearArrow');
+  let best=null, bd=1e9;
+  for(const f of fieldLetters){ if(!f.userData.landed) continue; const d=hDist(f,player.pos); if(d<bd){bd=d;best=f;} }
+  if(!best || bd<PICK.autoR){ el.style.display='none'; return; }
+  _v.copy(best.position); _v.y=0.3;
+  const inFront=_v.clone().applyMatrix4(camera.matrixWorldInverse).z<0;
+  _v.project(camera);
+  let x=_v.x, y=_v.y;
+  if(inFront && Math.abs(x)<0.92 && Math.abs(y)<0.88){ el.style.display='none'; return; } // 見えているなら出さない
+  if(!inFront){ x=-x; y=-y; if(Math.abs(x)<1e-3&&Math.abs(y)<1e-3) y=-1; } // 真後ろ：画面下へ
+  // 照準のまわりの だ円上に置く（HUD・スティック・ボタンに隠れない位置）
+  const k=1/Math.hypot(x/0.62, y/0.42); x*=k; y*=k;
+  const sx=(x+1)/2*innerWidth, sy=(1-y)/2*innerHeight;
+  const col=TYPES[best.userData.type].css;
+  el.style.display='block'; el.style.color=col;
+  el.style.transform=`translate(${sx}px,${sy}px)`;
+  el.querySelector('.ar').style.transform=`rotate(${Math.atan2(-y,x)}rad)`;
+  el.querySelector('.lt').textContent=best.userData.ch;
+}
+
 // ガード中の足元リング（プレイヤー・COM）
 function makeGuardRing(){ const m=new THREE.Mesh(new THREE.TorusGeometry(0.95,0.06,8,40),
     new THREE.MeshBasicMaterial({color:0x4FA8FF,transparent:true,opacity:0.8}));
@@ -1214,7 +1249,8 @@ function endGame(playerWon){
   document.body.classList.remove('aiming','guarding','guardEmpty');
   $('endTitle').textContent = playerWon?'🏆 WIN!':'😵 LOSE...';
   $('endTxt').textContent = playerWon?'COMくんに勝った！すごい！🎉':'次はタイプ相性でバリアを砕こう…！';
-  $('endOv').style.display='flex'; $('floatBtns').style.display='none'; playBgm('title');
+  $('endOv').style.display='flex'; $('floatBtns').style.display='none'; $('nearArrow').style.display='none';
+  document.body.classList.remove('playing'); playBgm('title');
   if(document.pointerLockElement) document.exitPointerLock();
 }
 function loop(){
@@ -1306,7 +1342,7 @@ function loop(){
   }
 
   // 盾の構え演出（キャラのローカル空間：前方に掲げる）
-  handS.position.lerp(player.guard?new THREE.Vector3(0,1.3,0.95):new THREE.Vector3(.7,1.15,.4),.25);
+  handS.position.lerp(player.guard?GUARD_POS:HAND_S,.25);
   handS.scale.setScalar(1);
   handW.rotation.y+= dt*2;
   com.handW.rotation.y+= dt*2;
@@ -1336,12 +1372,13 @@ function loop(){
     targetMark.rotation.y+=dt*2.5;
     targetMark.userData.setColor(TYPES[u.type].color);
   } else { tip.style.display='none'; targetMark.visible=false; }
+  updNearArrow();
   if(IS_TOUCH) $('btnSwap').style.opacity=(player.weapon||player.shield)?'1':'0.45';
 
   // COM
   comAI(dt);
   // COM盾の構え
-  com.handS.position.lerp(com.guard?new THREE.Vector3(0,1.3,0.6):new THREE.Vector3(.7,1.15,.4),.2);
+  com.handS.position.lerp(com.guard?GUARD_POS:HAND_S,.2);
   com.handS.scale.setScalar(1);
 
   // 投擲物
@@ -1443,7 +1480,9 @@ $('btnGuideClose').addEventListener('click',closeGuide);
     <li>「なげる」を押したままドラッグでねらって、<b>はなすと投げる</b>。<br>上に出る ✕ の上ではなすとキャンセル</li>
     <li>「⇄ 左右こうかん」：たまとバリアを持ちかえる</li>
     <li>「ぼうぎょ」を押している間：<b>ガード</b></li>
-    <li>⏸：きゅうけい　🧰：文字・アイテムを出す（れんしゅう中）</li></ul></div>`;
+    <li>ボタンは上から「なげる」「ぼうぎょ」「⇄ 左右こうかん」</li>
+    <li>右上の ⏸：きゅうけい　🧰：文字・アイテムを出す（れんしゅう中）</li>
+    <li>画面のはしの矢印：いちばん近い文字の方向（後ろにある時も分かる）</li></ul></div>`;
   $('ctrlPage').innerHTML=(IS_TOUCH?sp+pc:pc+sp)+
     '<p>文字に近づくと、空いている手に自動で持つ（両手が空いてたら先にたま）。両手がいっぱいの時は、投げて手を空けてから拾おう。バリアにしたい文字がたまの手にある時は「左右こうかん」。</p>'+
     '<p>⚙ せってい で、カメラの上下・左右反転や、ボタン配置の左右入れ替え（左利き向け）ができるよ。</p>'; }
@@ -1510,7 +1549,8 @@ function startGame(practice){
     document.querySelector('#cHp .hpName').textContent='COMくん（れんしゅう）⛄';
     $('btnTools').style.display='inline-block'; renderLetterGrid(); }
   show('titleOv',false); running=true; sfx('pick'); playBgm('battle');
-  if(IS_TOUCH){ $('floatBtns').style.display='flex'; $('pauseTxt').textContent='ひと休み。盤面をよく見て作戦を立てよう'; }
+  $('floatBtns').style.display='flex'; document.body.classList.add('playing'); // ⏸（と🧰）は右上
+  if(IS_TOUCH) $('pauseTxt').textContent='ひと休み。盤面をよく見て作戦を立てよう';
   else if(!practice) renderer.domElement.requestPointerLock();
   if(practice){ pauseGame(false); openGuide('prac'); } // まずは使い方を見せる（閉じるとマウス固定して開始）
 }
