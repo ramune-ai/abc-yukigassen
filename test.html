@@ -105,6 +105,7 @@
   /* 一時停止・設定・せつめい：盤面が見えるよう、ぼかさず薄く */
   .overlay.see{background:rgba(40,60,110,.18);backdrop-filter:none;-webkit-backdrop-filter:none;justify-content:flex-end;}
   .overlay.top{z-index:35;}
+  .overlay.top .card{background:#fff;} /* 下の画面が透けて文字が重ならないように */
   .card{background:rgba(255,255,255,.94);border-radius:24px;padding:clamp(16px, 3vmin, 24px) clamp(18px, 3.5vmin, 28px);
     width:100%;max-width:460px;max-height:100%;overflow-y:auto;box-sizing:border-box;box-shadow:0 8px 30px rgba(0,0,0,.18);
     touch-action:pan-y;-webkit-overflow-scrolling:touch;}
@@ -347,7 +348,7 @@
       </div>
       <p><b>持ちかえ</b>：「⇄ 左右こうかん」で、たまとバリアを入れかえられる（バリアの削れ具合はそのまま）。両手がいっぱいの時は、たまを投げて手を空けると次の文字を拾えるよ。</p>
       <p><b>宝石</b>：ときどき中央に宝石が降ってくる。ふれると8秒間パワーアップ！（→アイテム）</p>
-      <p><b>文字ごとに性能がちがう</b>：重い文字は強いけど遅い、細い文字は速いけどバリアには弱い…など。（→文字ずかん）</p>
+      <p><b>文字は形でクセがちがう</b>：重い文字は痛いけど遅い、軽い文字は速いけどふらつく、すきまの少ない文字は盾向き…など。優劣はなくて、使いどころがちがうだけ。（→文字ずかん）</p>
     </div>
 
     <div class="gpage" data-p="ctrl" id="ctrlPage"></div>
@@ -363,13 +364,24 @@
         <g font-size="13" font-weight="bold" fill="#FF5D8F" text-anchor="middle">
           <text x="262" y="100">つよい</text><text x="160" y="240">つよい</text><text x="58" y="100">つよい</text>
         </g>
+        <!-- 内側：にがて（逆向き・青） -->
+        <defs><marker id="ahb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2F86E0"/></marker></defs>
+        <g stroke="#2F86E0" stroke-width="3" fill="none" stroke-dasharray="6 4" marker-end="url(#ahb)">
+          <path d="M146,82 Q120,120 100,160"/>
+          <path d="M102,180 Q160,165 218,180"/>
+          <path d="M220,160 Q200,120 174,82"/>
+        </g>
+        <g font-size="12" font-weight="bold" fill="#2F86E0" text-anchor="middle">
+          <text x="136" y="132">にがて</text><text x="160" y="160">にがて</text><text x="186" y="132">にがて</text>
+        </g>
         <g text-anchor="middle" font-weight="bold">
           <circle cx="160" cy="45" r="34" fill="#FFE3E3" stroke="#F52A2A" stroke-width="3"/><text x="160" y="42" font-size="24">🔥</text><text x="160" y="64" font-size="13" fill="#F52A2A">赤</text>
           <circle cx="255" cy="190" r="34" fill="#E2F7E4" stroke="#4FC95D" stroke-width="3"/><text x="255" y="187" font-size="24">🌿</text><text x="255" y="209" font-size="13" fill="#3FA94C">緑</text>
           <circle cx="65" cy="190" r="34" fill="#DFF3FF" stroke="#2FB6FF" stroke-width="3"/><text x="65" y="187" font-size="24">💧</text><text x="65" y="209" font-size="13" fill="#1E9BE0">青</text>
         </g>
       </svg>
-      <p style="text-align:center;font-weight:bold;margin-top:0">🔥赤 は 🌿緑 に強い ／ 🌿緑 は 💧青 に強い ／ 💧青 は 🔥赤 に強い</p>
+      <p style="text-align:center;font-weight:bold;margin-top:0"><span style="color:#FF5D8F">━ つよい</span>：🔥赤 は 🌿緑 に、🌿緑 は 💧青 に、💧青 は 🔥赤 に強い<br>
+        <span style="color:#2F86E0">┅ にがて</span>：🔥赤 は 💧青 が、💧青 は 🌿緑 が、🌿緑 は 🔥赤 がにがて</p>
       <div class="gbox">
         <p style="margin:0 0 4px;font-weight:bold">たまがバリアに当たったとき、バリアが削れる量</p>
         <table class="mtable">
@@ -377,7 +389,7 @@
           <tr><td>🟰 同じ色どうし</td><td>50%</td></tr>
           <tr><td>💦 相性で負けてる色のたま</td><td>25%</td></tr>
         </table>
-        <p style="margin:4px 0 0;font-size:13px">※ 50%・25%は、バリアにした文字のかたさでも変わる（かたい文字ほど削れにくい）。<br>※ バリアに当たらずHPに当たった時のダメージは、色に関係なく同じ。</p>
+        <p style="margin:4px 0 0;font-size:13px">※ 50%・25%は、バリアにした文字の「盾むき」でも変わる（すきまの少ない文字ほど削れにくい）。<br>※ バリアに当たらずHPに当たった時のダメージは、色に関係なく同じ。</p>
       </div>
     </div>
 
@@ -387,7 +399,12 @@
         <button data-t="grass" style="color:#3FA94C">🌿 緑</button>
         <button data-t="water" style="color:#1E9BE0">💧 青</button>
       </div>
-      <p style="margin-top:0;font-size:13px">バーが長いほど高い。<b>こうげき</b>＝当てた時のダメージ ／ <b>はやさ</b>＝投げた時の速さ ／ <b>のび</b>＝遠くまで失速しにくい ／ <b>かたさ</b>＝バリアにした時の強さ</p>
+      <div class="gbox" style="font-size:13px;line-height:1.6">
+        文字に「強い・弱い」はない。ちがうのは<b>形</b>だけ！<br>
+        <b style="color:#FF5D8F">おもさ</b>：かるい ⇔ おもい。重いほど当たると痛いけど、遅くて落ちやすい。軽いほど速く遠くまで飛ぶけど、空気抵抗を受けやすい。<br>
+        <b style="color:#E09A1E">ふらつき</b>：投げた時のブレ。軽いほど、上が重い形（T・F・P・Yなど）ほどふらつく。下が重い形（A・Wなど）は安定。<br>
+        <b style="color:#2F86E0">盾むき</b>：すきまや穴が少なく、横幅いっぱいに広がった形ほどバリアにした時こわれにくい（M・H・W・Gなど）。I・Tのような細い形や、O・D・Qのような穴あきは不向き。
+      </div>
       <div class="lgrid" id="letterGrid"></div>
     </div>
 
@@ -460,35 +477,6 @@ const TYPES = {
 };
 const BEATS = {fire:'grass', grass:'water', water:'fire'}; // key が value に強い
 
-// 文字ごとの性能（dmg:攻撃力 spd:弾速 drag:空気抵抗 def:盾の硬さ trait:ひとこと）
-const LETTERS = {
-  A:{dmg:24, spd:24, drag:.09, def:1.05, trait:'三角どっしり。盾も攻めも安定'},
-  B:{dmg:25, spd:22, drag:.11, def:1.1,  trait:'まるっと頑丈。良い盾'},
-  C:{dmg:21, spd:24, drag:.12, def:.7,  trait:'開いた口…盾は少し穴あき'},
-  D:{dmg:25, spd:22, drag:.11, def:1.15, trait:'片面ぴったり。守り向き'},
-  E:{dmg:26, spd:21, drag:.12, def:1.15, trait:'ぎっしり重め。盾向き'},
-  F:{dmg:22, spd:25, drag:.09, def:.85, trait:'軽め。投げると伸びる'},
-  G:{dmg:25, spd:22, drag:.12, def:1.05, trait:'丸み＋ひっかけ。万能'},
-  H:{dmg:24, spd:24, drag:.08, def:1.0,  trait:'はしご型。バランス良し'},
-  I:{dmg:18, spd:30, drag:.02, def:.55, trait:'まっすぐ速い！でも盾には細すぎ'},
-  J:{dmg:20, spd:26, drag:.07, def:.7,  trait:'フック形。曲がって飛ぶ'},
-  K:{dmg:26, spd:23, drag:.10, def:.95, trait:'蹴り出す形。攻め向き'},
-  L:{dmg:22, spd:25, drag:.08, def:.9,  trait:'軽快。変な回転がかわいい'},
-  M:{dmg:28, spd:20, drag:.13, def:1.2,  trait:'山ふたつ。重くて硬い'},
-  N:{dmg:25, spd:23, drag:.10, def:1.0,  trait:'ジグザグ安定型'},
-  O:{dmg:22, spd:22, drag:.15, def:.65, trait:'まんなか空洞…盾には不向きw'},
-  P:{dmg:23, spd:24, drag:.10, def:.9,  trait:'上重心。投げると回る'},
-  Q:{dmg:24, spd:22, drag:.13, def:.8,  trait:'しっぽ付きのO。クセあり'},
-  R:{dmg:26, spd:23, drag:.10, def:1.0,  trait:'蹴り脚つき。攻守バランス'},
-  S:{dmg:21, spd:23, drag:.10, def:.9,  trait:'ふらふら曲がるくせ者'},
-  T:{dmg:24, spd:24, drag:.08, def:1.0,  trait:'バランス型。投げても守っても◎'},
-  U:{dmg:23, spd:23, drag:.11, def:.95, trait:'受け皿型。地味に守れる'},
-  V:{dmg:20, spd:26, drag:.06, def:.8,  trait:'よく飛ぶブーメラン気質'},
-  W:{dmg:29, spd:19, drag:.14, def:1.25, trait:'最大級！重くて超硬い盾'},
-  X:{dmg:30, spd:19, drag:.12, def:1.3,  trait:'重くて強い！最硬の盾'},
-  Y:{dmg:23, spd:25, drag:.08, def:.85, trait:'枝分かれ。投げ向き'},
-  Z:{dmg:25, spd:23, drag:.11, def:.95, trait:'稲妻形。シャープに飛ぶ'},
-};
 const FONT = {
   A:["00100","01010","10001","10001","11111","10001","10001"],
   B:["11110","10001","10001","11110","10001","10001","11110"],
@@ -517,6 +505,66 @@ const FONT = {
   Y:["10001","10001","01010","00100","00100","00100","00100"],
   Z:["11111","00001","00010","00100","01000","10000","11111"],
 };
+// ============ 文字の性能：形から自動で決める（手作業で優劣はつけない） ============
+// ・おもさ   ：文字を作っているブロック数（インクの量）
+// ・重心     ：ブロックの平均位置。上が重いとふらつき、下が重いと安定
+// ・すきま   ：外とつながっていない穴（O・D・Bの内側など）は盾にしても抜けやすい
+// そこから、ダメージ・弾速・空気抵抗・ふらつき・盾の強さを計算する
+const PHYS = {
+  dmgMin:21, dmgMax:28,     // 軽い→重い ダメージ
+  spdMax:27, spdMin:21,     // 軽い→重い 投げた時の速さ
+  dragMax:.13, dragMin:.06, // 軽い→重い 空気抵抗（軽いほど受けやすい）
+  defMin:.6, defMax:1.3,    // すきま多い→少ない 盾の強さ
+};
+const WOBBLE = {  // ふらつきの強さ（ふらつき0〜1に掛ける）
+  aimJitter: .10, // 投げた瞬間のズレ
+  flutter: 14,    // 飛行中のゆらゆらの強さ
+  freq: 7,        // ゆらゆらの速さ
+};
+const LETTERS = {};
+{ const raw={};
+  for(const ch in FONT){ const rows=FONT[ch]; let n=0,sx=0,sy=0;
+    for(let y=0;y<7;y++) for(let x=0;x<5;x++) if(rows[y][x]==='1'){ n++; sx+=x; sy+=y; }
+    // 外側からつながっていない空白＝穴（塗りつぶしで判定）
+    const seen=new Set(), st=[];
+    for(let y=0;y<7;y++) for(let x=0;x<5;x++) if((x===0||y===0||x===4||y===6) && rows[y][x]==='0'){ st.push([x,y]); seen.add(x+','+y); }
+    while(st.length){ const [x,y]=st.pop();
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const nx=x+dx, ny=y+dy, k=nx+','+ny;
+        if(nx<0||ny<0||nx>4||ny>6||seen.has(k)||rows[ny][nx]==='1') continue; seen.add(k); st.push([nx,ny]); } }
+    let holes=0; for(let y=0;y<7;y++) for(let x=0;x<5;x++) if(rows[y][x]==='0' && !seen.has(x+','+y)) holes++;
+    // 盾としての「ふさぎ具合」：各行で横幅をどれだけ覆っているか（M・Hは全行はしからはしまで、I・Tはほぼ棒だけ）
+    let span=0; for(let y=0;y<7;y++){ const a=rows[y].indexOf('1'), b=rows[y].lastIndexOf('1'); span+=a<0?0:(b-a+1)/5; }
+    raw[ch]={n, cx:sx/n, cy:sy/n, holes, span:span/7};
+  }
+  const nMaxAll=Math.max(...Object.values(raw).map(r=>r.n));
+  for(const ch in raw){ const r=raw[ch]; r.solid = 0.75*r.span + 0.25*r.n/nMaxAll - 1.5*r.holes/35; } // 穴は大きく減点
+  const ns=Object.values(raw).map(r=>r.n), ss=Object.values(raw).map(r=>r.solid);
+  const nMin=Math.min(...ns), nMax=Math.max(...ns), sMin=Math.min(...ss), sMax=Math.max(...ss);
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  for(const ch in raw){ const r=raw[ch];
+    const w=(r.n-nMin)/(nMax-nMin);                 // 0=いちばん軽い 1=いちばん重い
+    const top=cl((3-r.cy)/1.2,0,1), bottom=cl((r.cy-3)/1.2,0,1); // 上重心・下重心の度合い
+    const asym=cl(Math.abs(r.cx-2)/0.8,0,1);        // 左右のかたより
+    const wob=cl(0.35*(1-w) + 0.5*top + 0.25*asym - 0.2*bottom, 0.05, 1); // ふらつき
+    const shield=(r.solid-sMin)/(sMax-sMin);        // 0=すきまだらけ 1=すきまなし
+    const wWord = w<0.34?'かるい':w>0.66?'おもい':'ふつうの重さ';
+    const fWord = wob>0.55 ? (top>0.3?'上が重くてふらつきやすい':'軽くてふらつきやすい')
+                : wob<0.25 ? (bottom>0.3?'下が重くてまっすぐ安定':'まっすぐ安定')
+                : 'すこしブレる';
+    const sWord = shield>0.7 ? 'すきまが少なく盾向き'
+                : shield<0.35 ? (r.holes>=6?'穴があいていて盾には不向き':'すきまが多く盾は弱め')
+                : (r.holes>=6?'小さな穴あり。盾はふつう':'盾はふつう');
+    LETTERS[ch]={
+      weight:w, wob, shield, cy:r.cy, holes:r.holes,
+      dmg: Math.round(PHYS.dmgMin + (PHYS.dmgMax-PHYS.dmgMin)*w),
+      spd: PHYS.spdMax - (PHYS.spdMax-PHYS.spdMin)*w,
+      drag: PHYS.dragMax - (PHYS.dragMax-PHYS.dragMin)*w,
+      def: PHYS.defMin + (PHYS.defMax-PHYS.defMin)*shield,
+      trait: `${wWord}。${fWord}。${sWord}`,
+    };
+  }
+}
+
 const LKEYS = Object.keys(LETTERS);
 
 // ============ Three.js シーン ============
@@ -865,8 +913,11 @@ function throwLetter(owner, letter, from, dir){
   const g=buildLetter(letter.ch,letter.type,FIELD_SCALE);
   g.position.copy(from);
   scene.add(g);
-  projectiles.push({mesh:g, vel:dir.clone().multiplyScalar(st.spd), owner, letter,
-    drag:st.drag, life:5, sCurve:letter.ch==='S'?(Math.random()<.5?1:-1):0, t:0});
+  // 投げた瞬間のブレ：ふらつきやすい文字ほど、狙いから少しずれる
+  const d=dir.clone(), j=st.wob*WOBBLE.aimJitter;
+  d.x+=(Math.random()-.5)*j; d.y+=(Math.random()-.5)*j*0.6; d.z+=(Math.random()-.5)*j; d.normalize();
+  projectiles.push({mesh:g, vel:d.multiplyScalar(st.spd), owner, letter,
+    drag:st.drag, wob:st.wob, ph:Math.random()*Math.PI*2, sgn:Math.random()<.5?1:-1, life:5, t:0});
   sfx('throw');
 }
 function matchupPct(att, def){ // 盾に与えるダメージ%
@@ -966,11 +1017,10 @@ if(IS_TOUCH){
     stickVec={x:dx/smax,y:dy/smax};}e.preventDefault();},{passive:false});
   const endS=e=>{for(const t of e.changedTouches){if(t.identifier===sid){sid=null;stickVec={x:0,y:0};knob.style.transform='';}}};
   stick.addEventListener('touchend',endS); stick.addEventListener('touchcancel',endS);
-  // ボタン側（通常は右、左利き設定なら左）のドラッグで視点
+  // 画面のどこをドラッグしても視点（スティック・ボタン以外）。左手で移動しながら左人差し指で視点、もできる
   let lid=null,lp={x:0,y:0};
-  const inLookSide=x=> SET.lefty ? x<innerWidth*.58 : x>innerWidth*.42;
   addEventListener('touchstart',e=>{for(const t of e.changedTouches){
-    if(inLookSide(t.clientX) && t.target===renderer.domElement && lid===null){lid=t.identifier;lp={x:t.clientX,y:t.clientY};}}},{passive:false});
+    if(t.target===renderer.domElement && lid===null){lid=t.identifier;lp={x:t.clientX,y:t.clientY};}}},{passive:false});
   addEventListener('touchmove',e=>{for(const t of e.changedTouches){if(t.identifier!==lid)continue;
     turnView(t.clientX-lp.x,t.clientY-lp.y,CAM.sensTouch);
     lp={x:t.clientX,y:t.clientY};}},{passive:false});
@@ -1299,7 +1349,10 @@ function loop(){
     p.t+=dt; p.life-=dt;
     p.vel.y+=GRAV*dt;
     p.vel.multiplyScalar(1-p.drag*dt*3);
-    if(p.sCurve) p.vel.add(new THREE.Vector3(Math.cos(p.t*6)*p.sCurve*8*dt,0,0));
+    // 飛んでいる間のふらつき（進行方向に対して左右・上下にゆらゆら）
+    if(p.wob>0){ const side=new THREE.Vector3(-p.vel.z,0,p.vel.x).normalize(), f=p.wob*WOBBLE.flutter*dt;
+      p.vel.addScaledVector(side, Math.sin(p.t*WOBBLE.freq+p.ph)*p.sgn*f);
+      p.vel.y+=Math.cos(p.t*WOBBLE.freq*0.7+p.ph)*f*0.4; }
     p.mesh.position.addScaledVector(p.vel,dt);
     p.mesh.rotation.x+=dt*7; p.mesh.rotation.y+=dt*5;
     // COMのガード反応：プレイヤー弾が接近したら
@@ -1386,7 +1439,7 @@ $('btnGuideClose').addEventListener('click',closeGuide);
     <li><b class="k">ESC</b> きゅうけい（マウスが自由になる）</li></ul></div>`;
   const sp=`<div class="gbox"><p style="margin:0 0 4px;font-weight:bold">📱 スマホ</p><ul>
     <li>スティック：移動</li>
-    <li>ボタン側の画面をドラッグ：視点</li>
+    <li>画面をドラッグ（どこでもOK）：視点。移動しながら左人差し指でも回せる</li>
     <li>「なげる」を押したままドラッグでねらって、<b>はなすと投げる</b>。<br>上に出る ✕ の上ではなすとキャンセル</li>
     <li>「⇄ 左右こうかん」：たまとバリアを持ちかえる</li>
     <li>「ぼうぎょ」を押している間：<b>ガード</b></li>
@@ -1402,10 +1455,9 @@ function renderLetterGrid(){
   const col=TYPES[spawnType].css;
   $('letterGrid').innerHTML=LKEYS.map(ch=>{ const s=LETTERS[ch];
     return `<div class="lcard"><div class="lh"><span class="lch" style="color:${PRACTICE?col:'#555'}">${ch}</span><span class="ltr">${s.trait}</span></div>`+
-      `<div class="stat">こうげき${bar(s.dmg,16,30,'#FF5D8F')}</div>`+
-      `<div class="stat">はやさ${bar(s.spd,17,30,'#FFB13D')}</div>`+
-      `<div class="stat">のび${bar(.17-s.drag,0,.16,'#5DD66B')}</div>`+
-      `<div class="stat">かたさ${bar(s.def,.45,1.3,'#4FA8FF')}</div>`+
+      `<div class="stat">おもさ${bar(s.weight,0,1,'#FF5D8F')}</div>`+
+      `<div class="stat">ふらつき${bar(s.wob,0,1,'#FFB13D')}</div>`+
+      `<div class="stat">盾むき${bar(s.shield,0,1,'#4FA8FF')}</div>`+
       `<button class="spawnBtn" data-ch="${ch}" style="background:${col}">だす</button></div>`; }).join('');
   document.querySelectorAll('#spawnType button').forEach(b=>b.classList.toggle('sel',b.dataset.t===spawnType));
 }
@@ -1470,7 +1522,7 @@ updSlots(); updHP();
   const place=()=>document.documentElement.style.setProperty('--hudBottom',(hud.getBoundingClientRect().bottom+8)+'px');
   place(); if(window.ResizeObserver) new ResizeObserver(place).observe(hud); addEventListener('resize',place); }
 // 動作確認用（URLに ?debug=1 のときだけ内部状態を触れるようにする）
-if(Q.has('debug')) window.__g={player,com,fieldLetters,dropLetterAt,PICK,CAM,SET,snd};
+if(Q.has('debug')) window.__g={player,com,fieldLetters,dropLetterAt,PICK,CAM,SET,snd,LETTERS};
 // テスト版の目印（test.html で開いたときだけ）
 if(/test\.html$/i.test(location.pathname)) $('testBadge').style.display='block';
 })();
