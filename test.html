@@ -38,6 +38,7 @@
   .hpFill{height:100%;border-radius:7px;transition:width .25s;flex:none;}
   /* 上部のHPゲージ：今は頭上表示に切り替えたので隠す（HUD.topHp=true で復活。チーム戦などで使う想定） */
   body.noTopHp .hpName, body.noTopHp .hpBar{display:none;}
+  body.noSlots .slotRow{display:none;} /* 上部の持ち物欄（HUD.slots=true で復活） */
   #pHp .hpFill{background:linear-gradient(90deg,#FF8FB1,#FF5D8F);}
   #cHp .hpFill{background:linear-gradient(90deg,#B79CFF,#8E6CF0);}
   /* hand slots */
@@ -553,8 +554,9 @@ const CAM = {
   sensAim: .004,     // スマホ：なげるボタンを押したままドラッグする時の感度
 };
 // 画面上部のHPゲージを出すか（今は頭上のHP表示を使うので false。複数人・チーム戦で使うかも）
-const HUD = { topHp:false };
+const HUD = { topHp:false, slots:false }; // slots：上部の「バリア／たま」欄（持ち物の上の表示に切り替えたので非表示）
 document.body.classList.toggle('noTopHp', !HUD.topHp);
+document.body.classList.toggle('noSlots', !HUD.slots);
 // プレイヤーごとの設定（せってい画面で変更、ブラウザに保存）
 const SET_KEY='abcyukigassen.settings';
 const SET={invY:false, invX:false, lefty:false};
@@ -830,8 +832,8 @@ let PRACTICE=false, dummyType=''; // れんしゅうモード／練習相手に�
 
 // COMの見た目（雪だるま⛄ 紫マフラー）
 { const g=buildSnowman(0x8E6CF0, false);
-  com.handW=new THREE.Group(); com.handW.position.set(-1.15,1.2,.25); g.add(com.handW);
-  com.handS=new THREE.Group(); com.handS.position.set(1.15,1.2,.25); g.add(com.handS);
+  com.handW=new THREE.Group(); com.handW.position.set(-1.5,1.05,.2); g.add(com.handW);
+  com.handS=new THREE.Group(); com.handS.position.set(1.5,1.05,.2); g.add(com.handS);
   com.mesh=g; scene.add(g); }
 
 // プレイヤーの見た目（雪だるま⛄ 虹のマフラー）
@@ -868,8 +870,8 @@ function buildSnowman(scarfCol, isPlayer){
   cols.forEach((c,i)=>{ const r=new THREE.Mesh(new THREE.TorusGeometry(0.4-i*0.02,0.05,8,20),
     new THREE.MeshStandardMaterial({color:c,roughness:0.5})); r.position.y=1.16+i*0.03; r.rotation.x=Math.PI/2.2; g.add(r); });
   playerMesh.add(g);
-  playerMesh.userData.handW=new THREE.Group(); playerMesh.userData.handW.position.set(-1.15,1.2,.25); g.add(playerMesh.userData.handW);
-  playerMesh.userData.handS=new THREE.Group(); playerMesh.userData.handS.position.set(1.15,1.2,.25); g.add(playerMesh.userData.handS);
+  playerMesh.userData.handW=new THREE.Group(); playerMesh.userData.handW.position.set(-1.5,1.05,.2); g.add(playerMesh.userData.handW);
+  playerMesh.userData.handS=new THREE.Group(); playerMesh.userData.handS.position.set(1.5,1.05,.2); g.add(playerMesh.userData.handS);
   scene.add(playerMesh);
 }
 const handW=playerMesh.userData.handW;
@@ -877,8 +879,8 @@ const handS=playerMesh.userData.handS;
 scene.add(camera);
 
 // 手に持つ文字：体にめりこまない大きさ・位置（雪だるまの横に少し離して持つ）
-const HELD_SCALE=0.16;
-const HAND_W=new THREE.Vector3(-1.15,1.2,.25), HAND_S=new THREE.Vector3(1.15,1.2,.25); // たま（右手）／バリア（左手）
+const HELD_SCALE=0.14;
+const HAND_W=new THREE.Vector3(-1.5,1.05,.2), HAND_S=new THREE.Vector3(1.5,1.05,.2); // たま（右手）／バリア（左手）：体から外側へ離す
 const GUARD_POS=new THREE.Vector3(0,1.3,1.05); // ガード中はバリアを体の前へ
 function setHand(group, letter){ group.clear();
   if(letter) group.add(buildLetter(letter.ch,letter.type,HELD_SCALE,{held:true})); }
@@ -1292,7 +1294,8 @@ function mkWL(key,cls){ const d=document.createElement('div'); d.className='wl '
 mkWL('pHead','head'); mkWL('cHead','head'); mkWL('pW'); mkWL('pS'); mkWL('cW'); mkWL('cS');
 const _w=new THREE.Vector3(), _up=new THREE.Vector3();
 // 1行表示：アイコン（頭上は❤/⛄、持ち物は属性）＋「残り/100」＋バー
-function placeWL(el, obj, dy, icon, text, pct, col){
+// o.below：その位置の「下」に出す（自分のHPは足元）／o.alpha：うすさ（自分の表示は相手を見やすくするため薄く）
+function placeWL(el, obj, dy, icon, text, pct, col, o={}){
   if(!obj){ el.style.display='none'; return; }
   obj.getWorldPosition(_w); _w.y+=dy;
   _up.copy(_w).applyMatrix4(camera.matrixWorldInverse);
@@ -1300,7 +1303,8 @@ function placeWL(el, obj, dy, icon, text, pct, col){
   const dist=-_up.z, sc=Math.max(0.6,Math.min(1,7/dist)); // 遠いほど小さく
   _w.project(camera);
   el.style.display='flex'; el.style.zIndex=String(1000-Math.round(dist*10)); // 近いものを手前に
-  el.style.transform=`translate(${(_w.x+1)/2*innerWidth}px,${(1-_w.y)/2*innerHeight}px) scale(${sc}) translate(-50%,-100%)`; // 下中央を基準に縮める
+  el.style.transform=`translate(${(_w.x+1)/2*innerWidth}px,${(1-_w.y)/2*innerHeight}px) scale(${sc}) translate(-50%,${o.below?'4px':'-100%'})`; // 下中央（belowは上中央）を基準に縮める
+  el.style.opacity=o.alpha||1;
   if(el._t!==text){ el._t=text; el.querySelector('.wt').textContent=text; }
   if(el._i!==icon){ el._i=icon; el.querySelector('.wi').textContent=icon; }
   const b=el.querySelector('.wb b'); b.style.width=Math.max(0,Math.min(100,pct))+'%'; b.style.background=col;
@@ -1309,13 +1313,14 @@ const durOf=l=>l?(l.dur===undefined?100:Math.max(0,Math.round(l.dur))):0;
 function updWorldLabels(){
   if(!running){ for(const k in WL) WL[k].style.display='none'; return; }
   const ph=Math.max(0,Math.round(player.hp)), ch=Math.max(0,Math.round(com.hp));
-  placeWL(WL.pHead, playerMesh, 2.3, '❤', ph+'/100', ph, '#FF5D8F');
+  const MINE={alpha:0.55}; // 自分の表示のうすさ
+  placeWL(WL.pHead, playerMesh, 0, '❤', ph+'/100', ph, '#FF5D8F', {below:true, alpha:0.65}); // 自分のHPは足元に
   placeWL(WL.cHead, com.mesh, 2.3, '⛄', ch+'/100', ch, '#8E6CF0');
   // 手の文字：属性アイコン＋耐久（たまも耐久を覚えている＝左右こうかんでバリアにした時の残りHP）
-  const hs=[['pW',handW,player.weapon,durOf(player.weapon)],['pS',handS,player.shield,Math.round(player.shieldHP)],
-            ['cW',com.handW,com.weapon,durOf(com.weapon)],['cS',com.handS,com.shield,Math.round(com.shieldHP)]];
-  for(const [k,obj,l,hp] of hs){ if(!l){ WL[k].style.display='none'; continue; }
-    const v=Math.max(0,hp); placeWL(WL[k], obj, 0.68, TYPES[l.type].emoji, v+'/100', v, TYPES[l.type].css); }
+  const hs=[['pW',handW,player.weapon,durOf(player.weapon),MINE],['pS',handS,player.shield,Math.round(player.shieldHP),MINE],
+            ['cW',com.handW,com.weapon,durOf(com.weapon),{}],['cS',com.handS,com.shield,Math.round(com.shieldHP),{}]];
+  for(const [k,obj,l,hp,o] of hs){ if(!l){ WL[k].style.display='none'; continue; }
+    const v=Math.max(0,hp); placeWL(WL[k], obj, 0.62, TYPES[l.type].emoji, v+'/100', v, TYPES[l.type].css, o); }
 }
 
 // ガード中の足元リング（プレイヤー・COM）
