@@ -168,6 +168,44 @@
     background:#fff;color:var(--pink);transition:all .15s;min-height:46px;}
   .diffbtn.sel{background:linear-gradient(90deg,#FF5D8F,#FF8FB1);color:#fff;border-color:var(--pink);transform:scale(1.06);}
   .lead{font-weight:bold;}
+  /* タイトル：ふりがな・メニュー */
+  .card h1 ruby rt{font-size:.36em;letter-spacing:.12em;font-weight:bold;}
+  .menuCol{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:10px;}
+  .menuBtn{width:100%;max-width:300px;margin-top:0;}
+  .bigbtn.green{background:linear-gradient(90deg,#1FA84A,#4CC76C);box-shadow:0 4px 12px rgba(31,168,74,.35);}
+  .diffbtn.menuBtn{display:flex;flex-direction:column;align-items:center;line-height:1.25;padding:8px 14px;font-size:18px;}
+  .diffbtn small{font-size:12px;font-weight:normal;color:#999;margin-top:2px;}
+  .diffbtn:active{background:linear-gradient(90deg,#FF5D8F,#FF8FB1);color:#fff;}
+  /* 決着の大きな文字（盤面の上に出す） */
+  #banner{position:fixed;left:0;right:0;top:30%;z-index:28;text-align:center;display:none;pointer-events:none;
+    font-size:clamp(64px, 17vmin, 140px);font-weight:900;letter-spacing:.04em;animation:bannerIn .6s cubic-bezier(.2,1.6,.4,1);}
+  #banner.win{background:linear-gradient(90deg,#FF5D8F,#FFB13D,#5DD66B,#4FA8FF,#8E6CF0);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 4px 0 #fff) drop-shadow(0 6px 10px rgba(0,0,0,.25));}
+  #banner.lose{color:#7B88A8;filter:drop-shadow(0 4px 0 #fff) drop-shadow(0 6px 10px rgba(0,0,0,.2));}
+  @keyframes bannerIn{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
+  @media (orientation:landscape) and (max-height:500px){ #banner{top:12%;} }
+  /* 横向きでとても低い画面：タイトルは左（ロゴ＋説明）、右にボタン3つ。スクロールなしで収める */
+  @media (orientation:landscape) and (max-height:420px){
+    #titleOv{padding:calc(var(--sat) + 6px) calc(var(--sar) + 10px) calc(var(--sab) + 6px) calc(var(--sal) + 10px);}
+    .card.titleCard{padding:10px 16px;row-gap:0;align-items:center;}
+    .card.titleCard h1{grid-column:1;grid-row:1;font-size:26px;margin:0 auto;}
+    .card.titleCard .tcol:not(.menuCol){grid-column:1;grid-row:2;}
+    .card.titleCard .menuCol{grid-column:2;grid-row:1 / span 2;margin-top:0;gap:6px;}
+    .card.titleCard .lead{font-size:12px;line-height:1.4;margin:2px 0;}
+    .card.titleCard .types{font-size:13px;margin:2px 0;}
+    .card.titleCard .btnRow{margin-top:4px;} .card.titleCard .pill{min-height:34px;padding:4px 12px;font-size:14px;}
+    .card.titleCard .menuBtn{min-height:38px;padding:6px 14px;font-size:16px;}
+    #menuDiff{flex-direction:row;flex-wrap:wrap;justify-content:center;}
+    .card.titleCard .diffbtn.menuBtn{width:46%;min-height:36px;padding:3px 8px;font-size:15px;} .diffbtn small{display:none;}
+    .card.titleCard #btnDiffBack{min-height:30px;padding:3px 14px;font-size:13px;margin-top:0;}
+    #menuDiff p{display:none;}
+    #endOv .mtable td{font-size:13px;padding:2px 8px;}
+    #endOv .card{padding:10px 16px;max-width:560px;}
+  }
+  #endOv .card{max-width:420px;}
+  #endOv .mtable td{font-size:15px;padding:4px 8px;}
+  #endOv{animation:fadeUp .4s ease-out;}
+  @keyframes fadeUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:none}}
   /* 横向きスマホ：タイトルカードを横2段組みにして縦に収める */
   @media (max-height:500px) and (orientation:landscape){
     .titleCard{max-width:780px;display:grid;grid-template-columns:1fr 1fr;column-gap:22px;align-items:center;}
@@ -295,7 +333,7 @@
 
 <div class="overlay" id="titleOv">
   <div class="card titleCard">
-    <h1>ABC雪合戦</h1>
+    <h1>ABC<ruby>雪合戦<rt>ゆきがっせん</rt></ruby></h1>
     <div class="tcol">
       <p class="lead">アルファベットを拾って、投げて、ガード！<br>先に相手のHPを0にしたら勝ち🏆</p>
       <p class="types">🔥赤 ＞ 🌿緑 ＞ 💧青 ＞ 🔥赤</p>
@@ -304,24 +342,34 @@
         <button class="pill" id="btnSetT">⚙ せってい</button>
       </div>
     </div>
-    <div class="tcol">
-      <p style="font-weight:bold;margin:10px 0 4px">COMくんの強さ</p>
-      <div id="diffSel" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:6px">
-        <button class="diffbtn" data-d="easy">よわい</button>
-        <button class="diffbtn" data-d="normal">ふつう</button>
-        <button class="diffbtn" data-d="hard">つよい</button>
-        <button class="diffbtn" data-d="super">超つよい</button>
-      </div>
-      <button class="bigbtn" id="btnStart">バトル開始！</button><br>
-      <button class="bigbtn sub" id="btnPractice">🏫 れんしゅう</button>
+    <!-- メインメニュー -->
+    <div class="tcol menuCol" id="menuMain">
+      <button class="bigbtn sub menuBtn" id="btnPractice">🏫 れんしゅう場</button>
+      <button class="bigbtn menuBtn" id="btnBattle">⚔️ バトルスタート！</button>
+      <button class="bigbtn green menuBtn" id="btnTutorial">🔰 チュートリアル</button>
+    </div>
+    <!-- バトル：COMくんの強さをえらぶ（押したらすぐ開始） -->
+    <div class="tcol menuCol" id="menuDiff" style="display:none">
+      <p style="font-weight:bold;margin:4px 0 6px;color:#555">COMくんの強さをえらんでね</p>
+      <button class="diffbtn menuBtn" data-d="easy">よわい<small>のんびり。はじめての人に</small></button>
+      <button class="diffbtn menuBtn" data-d="normal">ふつう<small>ほどよく投げてくる</small></button>
+      <button class="diffbtn menuBtn" data-d="hard">つよい<small>ねらいが正確、よくガード</small></button>
+      <button class="diffbtn menuBtn" data-d="super">超つよい<small>連射＆鉄壁。腕に自信あり！</small></button>
+      <button class="bigbtn gray" id="btnDiffBack">← もどる</button>
     </div>
   </div>
 </div>
-<div class="overlay" id="endOv" style="display:none">
+<!-- 決着：盤面は見せたまま大きな文字 → 少しあとにリザルト（下寄せ） -->
+<div id="banner"></div>
+<div class="overlay see" id="endOv" style="display:none">
   <div class="card">
-    <h1 id="endTitle">WIN!</h1>
-    <p id="endTxt"></p>
-    <button class="bigbtn" onclick="location.reload()">もう一回！</button>
+    <h2 id="endTitle" style="text-align:center;margin-bottom:2px">かち！</h2>
+    <p id="endTxt" style="text-align:center;margin-top:0"></p>
+    <table class="mtable" id="endStats"></table>
+    <div class="btnRow">
+      <button class="bigbtn" id="btnRetry">もう一回！</button>
+      <button class="bigbtn gray" onclick="location.reload()">タイトルへ</button>
+    </div>
   </div>
 </div>
 
@@ -867,9 +915,20 @@ function flash(){ const f=$('flash'); f.style.opacity=1; setTimeout(()=>f.style.
 // iPhoneはアプリを閉じて戻ると AudioContext が壊れた状態（音程・リズムがおかしい、無音）になることがある。
 // なので画面を離れたら音の仕組みを丸ごと捨て、戻ってきたら作り直す。
 const BGM_FILES = { // 曲の差し替えはここだけ（sound/bgm/ に置いたファイル名）
-  title : 'sound/bgm/ABC Snow Battle.mp3',   // タイトル・リザルト
+  title : 'sound/bgm/ABC Snow Battle.mp3',   // タイトル
   battle: 'sound/bgm/Snow Battle Loop.mp3',  // 対戦中
+  result: 'sound/bgm/result.mp3',            // リザルト（置いてなければタイトル曲を流す）
 };
+// 効果音ファイル（置いてなければ、コードで作った仮の音を鳴らす）
+const SE_FILES = {
+  win : 'sound/se/win.mp3',   // 勝った時のジングル
+  lose: 'sound/se/lose.mp3',  // 負けた時のジングル
+};
+// 置いてあるファイルだけ使う（起動時に確認）
+const FILE_OK={};
+for(const f of [BGM_FILES.result, ...Object.values(SE_FILES)])
+  fetch(encodeURI(f),{method:'HEAD'}).then(r=>{ FILE_OK[f]=r.ok; }).catch(()=>{ FILE_OK[f]=false; });
+const bgmFile=name=> name==='result' && !FILE_OK[BGM_FILES.result] ? BGM_FILES.title : BGM_FILES[name];
 const VOL_KEY='abcyukigassen.volume';
 const VOL={bgm:0.6, se:0.8}; // 初期値（0〜1）
 try{ const v=JSON.parse(localStorage.getItem(VOL_KEY)||'null'); if(v){ if(v.bgm>=0&&v.bgm<=1) VOL.bgm=v.bgm; if(v.se>=0&&v.se<=1) VOL.se=v.se; } }catch(e){}
@@ -903,10 +962,24 @@ function playBgm(name){
   const el=snd.bgmEl;
   if(snd.cur!==name || !el.src){
     if(snd.cur && snd.cur!==name) snd.pos[snd.cur]=0; // 曲が変わったら前の曲は頭から
-    snd.cur=name; el.src=encodeURI(BGM_FILES[name]);
+    snd.cur=name; el.src=encodeURI(bgmFile(name));
     const t=snd.pos[name]||0; if(t>0) el.addEventListener('loadedmetadata',()=>{ try{ el.currentTime=t; }catch(e){} },{once:true});
   }
   const p=el.play(); if(p&&p.catch) p.catch(()=>{});
+}
+function stopBgm(){ bgmWant=null; if(snd.bgmEl){ snd.bgmEl.pause(); } if(snd.cur) snd.pos[snd.cur]=0; snd.cur=null; }
+// 効果音ファイルを鳴らす（無い・読めない時は fallback の仮の音）
+const seRaw={}, seBuf=new WeakMap();
+function playSe(key, fallback){
+  const f=SE_FILES[key], ac=audioReady();
+  if(!ac || !FILE_OK[f]){ fallback&&fallback(); return; }
+  let bufs=seBuf.get(ac); if(!bufs){ bufs={}; seBuf.set(ac,bufs); }
+  const go=b=>{ const s=ac.createBufferSource(); s.buffer=b; s.connect(snd.se); s.start(); };
+  if(bufs[f]){ go(bufs[f]); return; }
+  (seRaw[f]||(seRaw[f]=fetch(encodeURI(f)).then(r=>r.arrayBuffer())))
+    .then(ab=>ac.decodeAudioData(ab.slice(0)))
+    .then(b=>{ bufs[f]=b; go(b); })
+    .catch(()=>{ FILE_OK[f]=false; fallback&&fallback(); });
 }
 function applyVol(){
   if(snd.se) snd.se.gain.value=VOL.se;
@@ -916,8 +989,10 @@ function applyVol(){
 }
 // 最初のタップ／クリック、画面に戻ってきた後のタップで音を（作り直して）鳴らす
 function kickAudio(){ if(document.hidden) return; audioReady(); if(bgmWant && snd.bgmEl && snd.bgmEl.paused) playBgm(bgmWant); }
-addEventListener('pointerdown',()=>{ if(!bgmWant) bgmWant='title'; kickAudio(); },true);
-addEventListener('keydown',()=>{ if(!bgmWant) bgmWant='title'; kickAudio(); },true);
+let firstTouch=true; // 最初に触った時だけタイトル曲を流しはじめる（決着の静けさの後に勝手に鳴らさない）
+const firstKick=()=>{ if(firstTouch){ firstTouch=false; if(!bgmWant) bgmWant='title'; } kickAudio(); };
+addEventListener('pointerdown',firstKick,true);
+addEventListener('keydown',firstKick,true);
 addEventListener('touchend',kickAudio,true); // iOSは touchend でないと再生許可が下りないことがある
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) teardownAudio(); else kickAudio(); });
 addEventListener('pagehide',teardownAudio);
@@ -970,6 +1045,7 @@ function throwLetter(owner, letter, from, dir){
   d.x+=(Math.random()-.5)*j; d.y+=(Math.random()-.5)*j*0.6; d.z+=(Math.random()-.5)*j; d.normalize();
   projectiles.push({mesh:g, vel:d.multiplyScalar(st.spd), owner, letter,
     drag:st.drag, wob:st.wob, ph:Math.random()*Math.PI*2, sgn:Math.random()<.5?1:-1, life:5, t:0});
+  if(owner==='player') STATS.throws++;
   sfx('throw');
 }
 function matchupPct(att, def){ // 盾に与えるダメージ%
@@ -1003,16 +1079,19 @@ function resolveHit(p, victim, isPlayer){
         victim.shieldHP=0; victim.shield=null;
         if(isPlayer) setHand(handS,null); else setHand(com.handS,null);
         showMsg(base>=100?'💥 相性◎！バリアを一撃粉砕！！':'バリアがくだけた！','#FFD24A');
-        sfx('break'); if(!isPlayer) chime([1047,1319,1568,2093],0.1,0.05); // 相手のバリアをこわした時はキラキラも
+        sfx('break'); if(!isPlayer){ chime([1047,1319,1568,2093],0.1,0.05); STATS.breaks++; } // 相手のバリアをこわした時はキラキラも
       } else {
         showMsg(base<=25?'相性✕…バリアに25%だけ':'ガード！バリア-'+Math.round(pct)+'%','#BFE7FF');
         sfx('block');
       }
     }
   }
+  if(!isPlayer) STATS.hits++;             // 自分のたまが相手に届いた（バリアに当たってもカウント）
+  if(isPlayer && blocked) STATS.blocks++;
   if(!blocked){
     const dmgFinal = Math.round(dmg * (victim.buffs.def>0?0.7:1)); // 防御バフで被ダメ軽減
     victim.hp-=dmgFinal;
+    if(isPlayer) STATS.taken+=dmgFinal; else STATS.dealt+=dmgFinal;
     // 当てた時はうれしい上がり音「ピコーン！」、くらった時は残念な下がり音
     if(isPlayer) sfx('hurt'); else { sfx('hit'); chime([1319,1976],0.13,0.08); }
     if(isPlayer){ flash(); showMsg('-'+dmgFinal+' くらった！','#FF8FA8'); }
@@ -1020,7 +1099,7 @@ function resolveHit(p, victim, isPlayer){
   }
   if(PRACTICE && victim.hp<=0){ victim.hp=100; setTimeout(()=>showMsg('COMくん かいふく！','#fff'),700); }
   updHP(); updSlots();
-  if(victim.hp<=0) endGame(!isPlayer);
+  if(victim.hp<=0 && running) endGame(!isPlayer);
 }
 
 // ============ 入力（PC） ============
@@ -1317,15 +1396,47 @@ function comAI(dt){
 
 // ============ ゲームループ ============
 let running=false, last=performance.now(), spawnTimer=2.5, gemTimer=6;
+// 対戦の記録（リザルトに出す）
+const STATS={throws:0, hits:0, dealt:0, taken:0, blocks:0, breaks:0, t0:0};
+// 決着の演出：盤面は見せたまま「WIN!/LOSE…」→ ジングル → 少しあとにリザルト
+let endFx=null;
 function endGame(playerWon){
-  running=false; player.guard=false; aim.id=null;
-  document.body.classList.remove('aiming','guarding','guardEmpty');
-  $('endTitle').textContent = playerWon?'🏆 WIN!':'😵 LOSE...';
-  $('endTxt').textContent = playerWon?'COMくんに勝った！すごい！🎉':'次はタイプ相性でバリアを砕こう…！';
-  $('endOv').style.display='flex'; $('floatBtns').style.display='none'; $('nearArrow').style.display='none'; updWorldLabels();
-  document.body.classList.remove('playing'); playBgm('title');
+  running=false; player.guard=false; aim.id=null; stickVec={x:0,y:0};
+  document.body.classList.remove('aiming','guarding','guardEmpty','playing');
+  $('floatBtns').style.display='none'; $('nearArrow').style.display='none'; $('pickupTxt').style.display='none';
+  targetMark.visible=false; updWorldLabels();
   if(document.pointerLockElement) document.exitPointerLock();
+  endFx={t:0, won:playerWon, winner:playerWon?playerMesh:com.mesh, loser:playerWon?com.mesh:playerMesh};
+  // 大きな文字
+  const bn=$('banner'); bn.className=playerWon?'win':'lose'; bn.textContent=playerWon?'WIN!':'LOSE…'; bn.style.display='block';
+  // 音：BGMを止めてジングル
+  stopBgm();
+  if(playerWon) playSe('win',()=>chime([523,659,784,1047,784,1047,1319],0.14,0.12));
+  else playSe('lose',()=>chime([659,622,587,554,523],0.12,0.24));
+  // リザルト
+  const sec=Math.round((performance.now()-STATS.t0)/1000), mm=Math.floor(sec/60), ss=String(sec%60).padStart(2,'0');
+  const rate=STATS.throws?Math.round(STATS.hits/STATS.throws*100):0;
+  $('endTitle').textContent=playerWon?'🏆 かち！':'😵 まけ…';
+  $('endTitle').style.color=playerWon?'#FF5D8F':'#6C7A99';
+  $('endTxt').textContent=playerWon?`COMくん（${DIFF.label}）に勝った！すごい！🎉`:'次は相性でバリアを割ってみよう…！';
+  $('endStats').innerHTML=[
+    ['⏱ タイム',`${mm}:${ss}`],
+    ['🎯 命中',`${STATS.hits} / ${STATS.throws}（${rate}%）`],
+    ['💥 あたえたダメージ',STATS.dealt],
+    ['💦 うけたダメージ',STATS.taken],
+    ['🛡 ガードした回数',STATS.blocks],
+    ['🔨 こわしたバリア',STATS.breaks],
+  ].map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('');
+  setTimeout(()=>{ show('endOv',true); playBgm('result'); },2600);
 }
+// 決着後の動き：負けた雪だるまはころん、勝った方はぴょんぴょん
+function updEndFx(dt){
+  if(!endFx) return; endFx.t+=dt; const t=endFx.t;
+  endFx.loser.rotation.z += ((endFx.won?1:-1)*1.45 - endFx.loser.rotation.z)*Math.min(1,dt*4);
+  endFx.winner.position.y = Math.abs(Math.sin(t*7))*0.5*Math.max(0,1-t/4);
+}
+// もう一回：同じ強さですぐ始める（ページを読み直して状態をまっさらにする）
+function retryBattle(){ try{ sessionStorage.setItem('abcyukigassen.retry', DIFF===DIFFS.easy?'easy':DIFF===DIFFS.hard?'hard':DIFF===DIFFS.super?'super':'normal'); }catch(e){} location.reload(); }
 function loop(){
   requestAnimationFrame(loop);
   const now=performance.now(); let dt=Math.min(.05,(now-last)/1000); last=now;
@@ -1342,6 +1453,7 @@ function loop(){
   for(let i=parts.length-1;i>=0;i--){const q=parts[i]; q.life-=dt; q.vel.y+=GRAV*dt;
     q.m.position.addScaledVector(q.vel,dt); q.m.scale.multiplyScalar(.94);
     if(q.life<=0){scene.remove(q.m);parts.splice(i,1);} }
+  updEndFx(dt);
   if(!running){ renderer.render(scene,camera); return; }
 
   // 宝石アイテムの出現（中央付近にときどき降ってくる）
@@ -1610,11 +1722,14 @@ function dummyAI(dt){
 }
 
 // ============ スタート ============
-const diffBtns=document.querySelectorAll('.diffbtn');
-function selectDiff(key){ DIFF=DIFFS[key];
-  diffBtns.forEach(b=>b.classList.toggle('sel', b.dataset.d===key)); }
-diffBtns.forEach(b=>b.addEventListener('click',()=>{ selectDiff(b.dataset.d); sfx('pick'); }));
-selectDiff('normal'); // 初期は「ふつう」
+// タイトル：れんしゅう場／バトルスタート！（→強さをえらぶと開始）／チュートリアル
+const diffBtns=document.querySelectorAll('#menuDiff .diffbtn');
+function selectDiff(key){ DIFF=DIFFS[key]; }
+diffBtns.forEach(b=>b.addEventListener('click',()=>{ selectDiff(b.dataset.d); startGame(false); }));
+$('btnBattle').addEventListener('click',()=>{ sfx('pick'); $('menuMain').style.display='none'; $('menuDiff').style.display='flex'; });
+$('btnDiffBack').addEventListener('click',()=>{ sfx('pick'); $('menuDiff').style.display='none'; $('menuMain').style.display='flex'; });
+$('btnTutorial').addEventListener('click',()=>openGuide('rule')); // ※本格的なチュートリアルは準備中。いまは「あそびかた」を開く
+$('btnRetry').addEventListener('click',retryBattle);
 
 function startGame(practice){
   PRACTICE=practice; document.body.classList.toggle('practice',practice);
@@ -1622,20 +1737,22 @@ function startGame(practice){
     document.querySelector('#cHp .hpName').textContent='COMくん（れんしゅう）⛄';
     $('btnTools').style.display='inline-block'; renderLetterGrid(); }
   show('titleOv',false); running=true; sfx('pick'); playBgm('battle');
+  for(const k in STATS) STATS[k]=0; STATS.t0=performance.now();
   $('floatBtns').style.display='flex'; document.body.classList.add('playing'); // ⏸（と🧰）は右上
   if(IS_TOUCH) $('pauseTxt').textContent='ひと休み。盤面をよく見て作戦を立てよう';
-  else if(!practice) renderer.domElement.requestPointerLock();
+  else if(!practice){ const p=renderer.domElement.requestPointerLock(); if(p&&p.catch) p.catch(()=>{}); } // 自動開始時は失敗してもOK（画面クリックで固定）
   if(practice){ pauseGame(false); openGuide('prac'); } // まずは使い方を見せる（閉じるとマウス固定して開始）
 }
-$('btnStart').addEventListener('click',()=>startGame(false));
 $('btnPractice').addEventListener('click',()=>startGame(true));
+// リザルトの「もう一回！」から来た時は、同じ強さですぐ始める
+try{ const r=sessionStorage.getItem('abcyukigassen.retry'); if(r && DIFFS[r]){ sessionStorage.removeItem('abcyukigassen.retry'); selectDiff(r); startGame(false); } }catch(e){}
 updSlots(); updHP();
 // 「拾える」ヒントをHUDのすぐ下に置く（HUDの高さは画面サイズ・バフ表示で変わる）
 { const hud=$('hpWrap');
   const place=()=>document.documentElement.style.setProperty('--hudBottom',(hud.getBoundingClientRect().bottom+8)+'px');
   place(); if(window.ResizeObserver) new ResizeObserver(place).observe(hud); addEventListener('resize',place); }
 // 動作確認用（URLに ?debug=1 のときだけ内部状態を触れるようにする）
-if(Q.has('debug')) window.__g={player,com,fieldLetters,dropLetterAt,PICK,CAM,SET,snd,LETTERS};
+if(Q.has('debug')) window.__g={player,com,fieldLetters,dropLetterAt,PICK,CAM,SET,snd,LETTERS,endGame,STATS};
 // テスト版の目印（test.html で開いたときだけ）
 if(/test\.html$/i.test(location.pathname)) $('testBadge').style.display='block';
 })();
