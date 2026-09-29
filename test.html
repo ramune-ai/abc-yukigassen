@@ -10,11 +10,12 @@
     --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
     --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
     /* 画面サイズに合わせて伸び縮みするUI寸法 */
-    --slot:clamp(46px, 9vmin, 72px);
-    --padbtn:clamp(58px, 15vmin, 80px);
-    --padgap:clamp(8px, 2vmin, 12px);
-    --stick:clamp(96px, 26vmin, 132px);
-    --knob:calc(var(--stick) * .34);
+    --slot:clamp(56px, 11vmin, 84px);
+    --padbtn:clamp(76px, 21vmin, 100px);
+    --padgap:clamp(10px, 2.4vmin, 14px);
+    --stick:clamp(128px, 36vmin, 170px);
+    --knob:calc(var(--stick) * .36);
+    --pink:#FF5D8F;
   }
   html,body{margin:0;padding:0;overflow:hidden;width:100%;height:100%;background:#BFE7FF;
     font-family:"Hiragino Maru Gothic ProN","Rounded Mgen+",-apple-system,sans-serif;
@@ -25,131 +26,187 @@
   /* HP bars */
   #hpWrap{top:0;left:0;right:0;display:flex;justify-content:space-between;gap:12px;
     padding:calc(var(--sat) + 10px) calc(var(--sar) + 14px) 0 calc(var(--sal) + 14px);}
-  .hpBox{flex:1;max-width:min(48%, 440px);}
-  .hpName{font-size:clamp(12px, 2.4vmin, 16px);font-weight:bold;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35);margin-bottom:3px;white-space:nowrap;}
-  .hpBar{height:clamp(10px, 2vmin, 14px);border-radius:8px;background:rgba(255,255,255,.45);overflow:hidden;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;}
+  .hpBox{flex:1;max-width:min(48%, 460px);}
+  .hpName{font-size:clamp(15px, 3.2vmin, 20px);font-weight:bold;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35);margin-bottom:4px;white-space:nowrap;}
+  .hpBar{height:clamp(12px, 2.4vmin, 16px);border-radius:9px;background:rgba(255,255,255,.45);overflow:hidden;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;}
   #cHp .hpBar{justify-content:flex-end;}
-  .hpFill{height:100%;border-radius:6px;transition:width .25s;flex:none;}
+  .hpFill{height:100%;border-radius:7px;transition:width .25s;flex:none;}
   #pHp .hpFill{background:linear-gradient(90deg,#FF8FB1,#FF5D8F);}
   #cHp .hpFill{background:linear-gradient(90deg,#B79CFF,#8E6CF0);}
   /* hand slots */
-  .slotRow{display:flex;gap:clamp(5px, 1.2vmin, 8px);}
-  .underbar{display:flex;align-items:flex-start;gap:10px;margin-top:6px;justify-content:flex-end;}
+  .slotRow{display:flex;gap:clamp(6px, 1.4vmin, 9px);}
+  .underbar{display:flex;align-items:flex-start;gap:10px;margin-top:7px;justify-content:flex-end;}
   #cHp .underbar{justify-content:flex-end;}
   .buffCol{display:flex;flex-direction:column;gap:4px;padding-top:2px;}
   #buffs,#cbuffs{display:flex;flex-direction:column;gap:5px;}
-  .buff{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.78);border-radius:12px;padding:4px 10px;font-size:clamp(11px, 2.2vmin, 14px);font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.12);}
-  .buff .bt{height:5px;border-radius:3px;background:rgba(0,0,0,.12);width:clamp(30px, 7vmin, 54px);overflow:hidden;}
+  .buff{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.8);border-radius:14px;padding:4px 10px;font-size:clamp(14px, 3vmin, 18px);font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+  .buff .bt{height:6px;border-radius:3px;background:rgba(0,0,0,.12);width:clamp(34px, 8vmin, 58px);overflow:hidden;}
   .buff .bt i{display:block;height:100%;border-radius:3px;}
-  .slot{width:var(--slot);height:var(--slot);border-radius:calc(var(--slot) * .22);background:rgba(255,255,255,.6);border:2px solid #fff;
+  .slot{width:var(--slot);height:var(--slot);border-radius:calc(var(--slot) * .22);background:rgba(255,255,255,.65);border:2px solid #fff;
     display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.12);box-sizing:border-box;}
   .slot .ch{font-size:calc(var(--slot) * .5);font-weight:900;line-height:1;}
-  .slot .lb{font-size:calc(var(--slot) * .165);color:#666;margin-top:2px;white-space:nowrap;}
-  .slot .sh{font-size:calc(var(--slot) * .165);color:#444;font-weight:bold;white-space:nowrap;}
+  .slot .lb{font-size:calc(var(--slot) * .18);color:#555;margin-top:2px;white-space:nowrap;}
+  .slot .sh{font-size:calc(var(--slot) * .17);color:#333;font-weight:bold;white-space:nowrap;}
+  .slot.pop{animation:pop .35s ease-out;}
+  @keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.22)}100%{transform:scale(1)}}
   /* 縦長スマホ：持ち物とバフを縦に積む */
   @media (max-width:560px){
     .underbar{flex-direction:column!important;align-items:flex-start;gap:4px;}
     #cHp .underbar{align-items:flex-end;}
     .slotRow{order:1;}
     .buffCol{order:2;flex-direction:row;flex-wrap:wrap;}
-    .buff{padding:2px 6px;}
+    .buff{padding:2px 7px;}
   }
   /* 横向きスマホ（高さが低い）：HUDをコンパクトに */
   @media (max-height:500px){
     #hpWrap{padding-top:calc(var(--sat) + 6px);}
-    .hpBox{max-width:min(40%, 360px);}
+    .hpBox{max-width:min(40%, 380px);}
     .underbar{margin-top:4px;}
-    .buff{padding:2px 7px;}
+    .buff{padding:2px 8px;}
   }
   /* message popup */
-  #msg{top:44%;left:0;right:0;text-align:center;font-size:clamp(18px, 4.2vmin, 30px);font-weight:900;color:#fff;
+  #msg{top:40%;left:0;right:0;text-align:center;font-size:clamp(22px, 5.2vmin, 36px);font-weight:900;color:#fff;
     padding:0 calc(var(--sar) + 16px) 0 calc(var(--sal) + 16px);
-    text-shadow:0 2px 0 rgba(0,0,0,.25),0 0 14px rgba(255,255,255,.6);opacity:0;transition:opacity .2s;}
+    text-shadow:0 2px 0 rgba(0,0,0,.28),0 0 14px rgba(255,255,255,.6);opacity:0;transition:opacity .2s;}
   /* 拾えるヒント：HUDの直下に出す（topはJSでHUDの高さに合わせる） */
   #pickupTip{top:var(--hudBottom, 168px);left:0;right:0;text-align:center;padding:0 16px;}
-  #pickupTip .inner{display:inline-block;max-width:min(520px, 100%);box-sizing:border-box;background:rgba(255,255,255,.85);border-radius:14px;
-    padding:clamp(5px, 1.2vmin, 8px) clamp(10px, 2.4vmin, 16px);font-size:clamp(12px, 2.4vmin, 16px);font-weight:bold;color:#444;box-shadow:0 2px 8px rgba(0,0,0,.15);}
-  /* touch UI */
-  /* スマホ：右下に2×2のボタングリッド */
+  #pickupTip .inner{display:inline-block;max-width:min(560px, 100%);box-sizing:border-box;background:rgba(255,255,255,.88);border-radius:16px;
+    padding:clamp(6px, 1.4vmin, 9px) clamp(12px, 2.8vmin, 18px);font-size:clamp(15px, 3.2vmin, 19px);font-weight:bold;color:#444;box-shadow:0 2px 8px rgba(0,0,0,.15);line-height:1.45;}
+  /* touch UI：右下に縦1列（上から なげる／左右こうかん／バリア）。左利き設定で左側へ */
   #pad{position:fixed;z-index:20;right:calc(var(--sar) + 14px);bottom:calc(var(--sab) + 16px);
-    display:grid;grid-template-columns:repeat(2,var(--padbtn));grid-template-rows:repeat(2,var(--padbtn));gap:var(--padgap);}
-  .padbtn{border:none;border-radius:calc(var(--padbtn) * .24);font-weight:900;color:#fff;font-size:calc(var(--padbtn) * .2);
+    display:grid;grid-template-columns:var(--padw);grid-template-rows:repeat(3,var(--padbtn));gap:var(--padgap);}
+  :root{--padw:calc(var(--padbtn) * 1.3);}
+  @media (max-height:500px){ :root{--padbtn:clamp(62px, 18.5vmin, 80px);--padgap:8px;} }
+  .padbtn{border:none;border-radius:calc(var(--padbtn) * .24);font-weight:900;color:#fff;font-size:calc(var(--padbtn) * .21);
     box-shadow:0 3px 10px rgba(0,0,0,.22);touch-action:none;-webkit-tap-highlight-color:transparent;padding:0;
-    display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;font-family:inherit;}
+    display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;font-family:inherit;
+    transition:transform .06s, filter .06s;}
   #btnGuard{background:#4FA8FF;}
-  #btnThrow{background:#FF5D8F;}
-  #btnPickS{background:#7C9CFF;font-size:calc(var(--padbtn) * .17);}
-  #btnPickW{background:#5DD66B;font-size:calc(var(--padbtn) * .17);}
-  #stick{position:fixed;z-index:20;left:calc(var(--sal) + 28px);bottom:calc(var(--sab) + 22px);width:var(--stick);height:var(--stick);border-radius:50%;
+  #btnThrow{background:var(--pink);}
+  #btnSwap{background:#9B7BF0;font-size:calc(var(--padbtn) * .17);line-height:1.25;}
+  #stick{position:fixed;z-index:20;left:calc(var(--sal) + 24px);bottom:calc(var(--sab) + 20px);width:var(--stick);height:var(--stick);border-radius:50%;
     background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.7);touch-action:none;box-sizing:border-box;}
   #stickKnob{position:absolute;left:50%;top:50%;width:var(--knob);height:var(--knob);margin:calc(var(--knob) / -2) 0 0 calc(var(--knob) / -2);
-    border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 2px 6px rgba(0,0,0,.2);}
+    border-radius:50%;background:rgba(255,255,255,.88);box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  body.lefty #pad{right:auto;left:calc(var(--sal) + 14px);}
+  body.lefty #stick{left:auto;right:calc(var(--sar) + 24px);}
+  body.lefty #floatBtns{flex-direction:row-reverse;}
+  /* 対戦中の小ボタン（⏸・🧰）：ボタン列のとなり（上端にそろえる） */
+  #floatBtns{position:fixed;z-index:22;right:calc(var(--sar) + 26px + var(--padw));
+    bottom:calc(var(--sab) + 16px + var(--padbtn) * 3 + var(--padgap) * 2 - 106px);display:none;flex-direction:column;gap:10px;}
+  body.lefty #floatBtns{right:auto;left:calc(var(--sal) + 26px + var(--padw));}
+  body.aiming #floatBtns{visibility:hidden;} /* ねらい中は✕キャンセルと重ならないように隠す */
+  .fbtn{width:48px;height:48px;border-radius:50%;border:2px solid #fff;background:rgba(255,255,255,.6);color:#555;
+    font-size:20px;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.15);touch-action:none;-webkit-tap-highlight-color:transparent;font-family:inherit;}
   /* overlays */
   .overlay{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;
     background:rgba(120,180,255,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-align:center;box-sizing:border-box;
     padding:calc(var(--sat) + 16px) calc(var(--sar) + 16px) calc(var(--sab) + 16px) calc(var(--sal) + 16px);}
-  .card{background:rgba(255,255,255,.92);border-radius:24px;padding:clamp(16px, 3vmin, 24px) clamp(18px, 3.5vmin, 28px);
-    width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;box-shadow:0 8px 30px rgba(0,0,0,.18);
+  /* 一時停止・設定・せつめい：盤面が見えるよう、ぼかさず薄く */
+  .overlay.see{background:rgba(40,60,110,.18);backdrop-filter:none;-webkit-backdrop-filter:none;justify-content:flex-end;}
+  .overlay.top{z-index:35;}
+  .card{background:rgba(255,255,255,.94);border-radius:24px;padding:clamp(16px, 3vmin, 24px) clamp(18px, 3.5vmin, 28px);
+    width:100%;max-width:460px;max-height:100%;overflow-y:auto;box-sizing:border-box;box-shadow:0 8px 30px rgba(0,0,0,.18);
     touch-action:pan-y;-webkit-overflow-scrolling:touch;}
-  .card h1{margin:0 auto 6px;width:fit-content;font-size:clamp(24px, 5vmin, 32px);letter-spacing:.05em;
+  .card h1{margin:0 auto 6px;width:fit-content;font-size:clamp(26px, 5.6vmin, 34px);letter-spacing:.05em;
     background:linear-gradient(90deg,#FF5D8F,#FFB13D,#5DD66B,#4FA8FF,#8E6CF0);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .card p{font-size:clamp(12px, 2.2vmin, 14px);color:#555;margin:8px 0;line-height:1.7;}
-  .card .types{font-size:clamp(13px, 2.4vmin, 15px);font-weight:bold;margin:6px 0;}
-  .bigbtn{margin-top:10px;border:none;border-radius:16px;padding:12px 30px;font-size:17px;font-weight:900;color:#fff;font-family:inherit;
-    background:linear-gradient(90deg,#FF5D8F,#FF8FB1);box-shadow:0 4px 12px rgba(255,93,143,.4);cursor:pointer;min-height:44px;}
-  .diffbtn{border:2px solid #FFB1C9;border-radius:12px;padding:8px 14px;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;
-    background:#fff;color:#FF5D8F;transition:all .15s;min-height:40px;}
-  .diffbtn.sel{background:linear-gradient(90deg,#FF5D8F,#FF8FB1);color:#fff;border-color:#FF5D8F;transform:scale(1.06);}
+  .card h2{margin:0 0 8px;font-size:clamp(20px, 4.4vmin, 26px);color:var(--pink);}
+  .card p{font-size:clamp(14px, 2.8vmin, 16px);color:#555;margin:8px 0;line-height:1.7;}
+  .card .types{font-size:clamp(15px, 3vmin, 17px);font-weight:bold;margin:6px 0;}
+  .bigbtn{margin-top:10px;border:none;border-radius:16px;padding:13px 30px;font-size:19px;font-weight:900;color:#fff;font-family:inherit;
+    background:linear-gradient(90deg,#FF5D8F,#FF8FB1);box-shadow:0 4px 12px rgba(255,93,143,.4);cursor:pointer;min-height:50px;}
+  .bigbtn.sub{background:linear-gradient(90deg,#5DB8FF,#8FD0FF);box-shadow:0 4px 12px rgba(79,168,255,.35);}
+  .bigbtn.gray{background:linear-gradient(90deg,#9aa,#bcc);box-shadow:none;font-size:16px;padding:10px 22px;min-height:44px;}
+  .btnRow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+  .pill{border:2px solid #FFB1C9;border-radius:14px;padding:9px 16px;font-size:16px;font-weight:bold;cursor:pointer;font-family:inherit;
+    background:#fff;color:var(--pink);min-height:46px;}
+  .diffbtn{border:2px solid #FFB1C9;border-radius:12px;padding:9px 14px;font-size:16px;font-weight:bold;cursor:pointer;font-family:inherit;
+    background:#fff;color:var(--pink);transition:all .15s;min-height:46px;}
+  .diffbtn.sel{background:linear-gradient(90deg,#FF5D8F,#FF8FB1);color:#fff;border-color:var(--pink);transform:scale(1.06);}
+  .lead{font-weight:bold;}
   /* 横向きスマホ：タイトルカードを横2段組みにして縦に収める */
   @media (max-height:500px) and (orientation:landscape){
-    .titleCard{max-width:760px;display:grid;grid-template-columns:1fr 1fr;column-gap:22px;align-items:center;}
+    .titleCard{max-width:780px;display:grid;grid-template-columns:1fr 1fr;column-gap:22px;align-items:center;}
     .titleCard h1{grid-column:1 / -1;margin-bottom:2px;}
     .card p{margin:4px 0;line-height:1.55;}
     .card .bigbtn{margin-top:6px;}
+    .overlay.see .card{max-height:calc(100% - 4px);}
   }
   #flash{position:fixed;inset:0;z-index:25;background:rgba(255,60,90,.35);opacity:0;pointer-events:none;transition:opacity .3s;}
-  #cross{top:50%;left:50%;width:14px;height:14px;margin:-7px;z-index:9;}
-  #cross:before,#cross:after{content:"";position:absolute;background:rgba(255,255,255,.9);border-radius:2px;}
-  #cross:before{left:6px;top:0;width:2px;height:14px;}
-  #cross:after{top:6px;left:0;width:14px;height:2px;}
+  #cross{top:50%;left:50%;width:16px;height:16px;margin:-8px;z-index:9;}
+  #cross:before,#cross:after{content:"";position:absolute;background:rgba(255,255,255,.95);border-radius:2px;}
+  #cross:before{left:7px;top:0;width:2px;height:16px;}
+  #cross:after{top:7px;left:0;width:16px;height:2px;}
   /* ガード中の見た目 */
   #guardFx{position:fixed;inset:0;z-index:8;pointer-events:none;opacity:0;transition:opacity .12s;
     box-shadow:inset 0 0 clamp(40px, 10vmin, 90px) rgba(79,168,255,.65);}
   body.guarding #guardFx{opacity:1;}
-  #guardLbl{top:calc(50% + 22px);left:0;right:0;text-align:center;font-size:clamp(13px, 2.6vmin, 17px);font-weight:900;}
-  #guardLbl span{display:none;background:rgba(255,255,255,.85);border-radius:12px;padding:3px 12px;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+  #guardLbl{top:calc(50% + 24px);left:0;right:0;text-align:center;font-size:clamp(15px, 3.2vmin, 19px);font-weight:900;}
+  #guardLbl span{display:none;background:rgba(255,255,255,.88);border-radius:12px;padding:3px 12px;box-shadow:0 2px 6px rgba(0,0,0,.15);}
   #guardLbl .on{color:#2F86E0;} #guardLbl .empty{color:#888;}
   body.guarding #guardLbl .on, body.guardEmpty #guardLbl .empty{display:inline-block;}
   body.guarding #slotS{box-shadow:0 0 0 3px #4FA8FF,0 0 16px #4FA8FF;background:rgba(220,238,255,.9);}
-  .padbtn{transition:transform .06s, filter .06s;}
   .padbtn.held, body.guarding #btnGuard, body.guardEmpty #btnGuard{transform:scale(.92);filter:brightness(1.15);}
   /* スマホ：なげるボタン長押しドラッグ中 */
-  #aimGuide{top:calc(50% + 22px);left:50%;transform:translateX(-50%);display:none;font-size:clamp(13px, 2.6vmin, 16px);font-weight:900;color:#fff;
-    background:rgba(255,93,143,.9);border-radius:12px;padding:3px 12px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+  #aimGuide{top:calc(50% + 24px);left:50%;transform:translateX(-50%);display:none;font-size:clamp(15px, 3.2vmin, 18px);font-weight:900;color:#fff;
+    background:rgba(255,93,143,.92);border-radius:12px;padding:3px 12px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);}
   body.aiming #aimGuide{display:block;}
   body.aiming.guarding #aimGuide{display:none;}
-  body.aiming #cross:before, body.aiming #cross:after{background:#FF5D8F;}
-  #aimCancel{position:fixed;z-index:21;display:none;right:calc(var(--sar) + 14px);top:calc(var(--hudBottom, 150px) + 8px);
-    width:clamp(70px, 17vmin, 92px);height:clamp(70px, 17vmin, 92px);border-radius:50%;box-sizing:border-box;
-    background:rgba(60,60,80,.45);border:3px dashed rgba(255,255,255,.85);color:#fff;font-size:26px;font-weight:900;
+  body.aiming #cross:before, body.aiming #cross:after{background:var(--pink);}
+  #aimCancel{position:fixed;z-index:21;display:none;left:50%;margin-left:calc(clamp(80px, 19vmin, 100px) / -2);top:calc(var(--hudBottom, 150px) + 8px);
+    width:clamp(80px, 19vmin, 100px);height:clamp(80px, 19vmin, 100px);border-radius:50%;box-sizing:border-box;
+    background:rgba(60,60,80,.45);border:3px dashed rgba(255,255,255,.85);color:#fff;font-size:28px;font-weight:900;
     flex-direction:column;align-items:center;justify-content:center;line-height:1;pointer-events:none;transition:transform .1s, background .1s;}
-  #aimCancel small{font-size:9px;line-height:1.2;margin-top:3px;}
+  #aimCancel small{font-size:11px;line-height:1.2;margin-top:3px;}
   body.aiming #aimCancel{display:flex;}
   #aimCancel.hot{background:rgba(255,70,90,.85);transform:scale(1.12);border-style:solid;}
-  /* 音量設定 */
-  .titleCard{position:relative;}
-  .iconbtn{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;border:2px solid #FFB1C9;background:#fff;
-    font-size:18px;cursor:pointer;padding:0;line-height:1;z-index:1;}
-  .volBox{margin:10px auto 4px;max-width:320px;}
-  .volRow{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:14px;font-weight:bold;color:#555;}
-  .volRow .vl{width:44px;text-align:left;white-space:nowrap;}
-  .volRow .vv{width:40px;text-align:right;font-variant-numeric:tabular-nums;color:#FF5D8F;}
-  .volRow input[type=range]{flex:1;accent-color:#FF5D8F;height:28px;touch-action:pan-x;}
-  #volOv{z-index:35;}
-  /* スマホ：対戦中の一時停止ボタン（下部中央） */
-  #btnMenu{position:fixed;z-index:22;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 30px);
-    width:36px;height:36px;border-radius:50%;border:2px solid #fff;background:rgba(255,255,255,.55);color:#555;
-    font-size:15px;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.15);touch-action:none;-webkit-tap-highlight-color:transparent;}
+  /* せってい */
+  .setSec{text-align:left;margin:12px 0 4px;}
+  .setSec h3{margin:0 0 6px;font-size:16px;color:#888;letter-spacing:.05em;}
+  .volRow{display:grid;grid-template-columns:auto 1fr 3.4em;align-items:center;gap:10px;margin:6px 0;font-size:16px;font-weight:bold;color:#555;}
+  .volRow .vl{white-space:nowrap;}
+  .volRow .vv{text-align:right;font-variant-numeric:tabular-nums;color:var(--pink);}
+  .volRow input[type=range]{width:100%;min-width:0;margin:0;accent-color:var(--pink);height:32px;touch-action:pan-x;}
+  .togRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;font-size:16px;font-weight:bold;color:#555;border-top:1px solid #f1e6ec;}
+  .togRow small{display:block;font-size:12px;color:#999;font-weight:normal;}
+  .tog{position:relative;width:54px;height:30px;flex:none;border-radius:15px;background:#ddd;border:none;padding:0;cursor:pointer;transition:background .15s;}
+  .tog:after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;}
+  .tog.on{background:var(--pink);} .tog.on:after{left:27px;}
+  /* せつめい（ガイド・ずかん） */
+  #guideOv .card{max-width:640px;text-align:left;padding-top:14px;}
+  #guideOv .card h1{margin-bottom:4px;}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:4px 0 12px;position:sticky;top:-14px;background:rgba(255,255,255,.96);padding:6px 0;z-index:1;}
+  .tab{border:2px solid #FFB1C9;border-radius:999px;padding:7px 14px;font-size:15px;font-weight:bold;background:#fff;color:var(--pink);cursor:pointer;font-family:inherit;}
+  .tab.sel{background:var(--pink);color:#fff;border-color:var(--pink);}
+  .gpage{display:none;} .gpage.sel{display:block;}
+  .gpage p, .gpage li{font-size:15px;color:#555;line-height:1.7;}
+  .gpage ul{padding-left:1.2em;margin:6px 0;}
+  .gbox{background:#FFF5F9;border-radius:14px;padding:10px 14px;margin:8px 0;}
+  .gbox b.k{display:inline-block;min-width:1.6em;padding:0 6px;border-radius:6px;background:#fff;border:1px solid #f0cfdc;text-align:center;margin-right:2px;}
+  .tri{display:block;width:100%;max-width:340px;margin:4px auto;}
+  .mtable{width:100%;border-collapse:collapse;font-size:15px;margin:6px 0;}
+  .mtable td{padding:6px 8px;border-bottom:1px solid #f3e3ea;}
+  .mtable td:last-child{text-align:right;font-weight:900;}
+  .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px;}
+  .lcard{background:#fff;border:2px solid #f3e3ea;border-radius:14px;padding:8px 10px;}
+  .lcard .lh{display:flex;align-items:center;gap:8px;}
+  .lcard .lch{font-size:30px;font-weight:900;line-height:1;width:1.1em;text-align:center;}
+  .lcard .ltr{font-size:12.5px;color:#666;line-height:1.35;}
+  .stat{display:grid;grid-template-columns:4.2em 1fr;align-items:center;gap:6px;font-size:12px;color:#777;margin-top:3px;}
+  .stat i{display:block;height:7px;border-radius:4px;background:#eee;overflow:hidden;}
+  .stat i b{display:block;height:100%;border-radius:4px;}
+  .spawnBtn{display:none;margin-top:6px;width:100%;border:none;border-radius:10px;padding:7px 0;font-size:14px;font-weight:900;color:#fff;cursor:pointer;font-family:inherit;}
+  body.practice .spawnBtn{display:block;}
+  .typeSel{display:none;gap:6px;justify-content:center;margin:0 0 10px;}
+  body.practice .typeSel{display:flex;}
+  .typeSel button{border:2px solid #ddd;border-radius:12px;padding:6px 14px;font-size:16px;font-weight:bold;background:#fff;cursor:pointer;font-family:inherit;}
+  .typeSel button.sel{border-color:currentColor;box-shadow:0 0 0 2px currentColor inset;}
+  .practiceOnly{display:none;} body.practice .practiceOnly{display:block;}
+  body.practice .battleOnly{display:none;}
+  .gemRow{display:flex;align-items:center;gap:10px;margin:8px 0;}
+  .gemRow .ge{font-size:26px;width:1.4em;text-align:center;}
+  .gemRow .gt{flex:1;font-size:15px;color:#555;line-height:1.5;}
+  .gemRow .spawnBtn{width:auto;padding:7px 14px;margin:0;}
   /* テスト版バッジ（test.html のときだけ表示） */
   #testBadge{display:none;position:fixed;z-index:40;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 6px);
     background:#FFB13D;color:#fff;font-size:11px;font-weight:900;padding:2px 10px;border-radius:10px;pointer-events:none;
@@ -194,23 +251,25 @@
 
 <div class="overlay" id="titleOv">
   <div class="card titleCard">
-    <button class="iconbtn" id="btnVolOpen" aria-label="音量設定">🔊</button>
     <h1>ABC雪合戦</h1>
     <div class="tcol">
-      <p>落ちてるアルファベットを拾って、右手の<b>たま</b>で投げ、左手の<b>バリア</b>でガード！<br>先に相手のHPを削ったほうの勝ち🏆</p>
-      <p class="types">🔥赤 ＞ 🌿緑 ＞ 💧青 ＞ 🔥赤…</p>
-      <p>相性で勝ってる攻撃は <b>バリアを一撃で粉砕</b>！<br>相性で負けてるとバリアに25%しか入らない…</p>
+      <p class="lead">アルファベットを拾って、投げて、ガード！<br>先に相手のHPを0にしたら勝ち🏆</p>
+      <p class="types">🔥赤 ＞ 🌿緑 ＞ 💧青 ＞ 🔥赤</p>
+      <div class="btnRow">
+        <button class="pill" id="btnGuideT">📖 せつめい</button>
+        <button class="pill" id="btnSetT">⚙ せってい</button>
+      </div>
     </div>
     <div class="tcol">
-      <p id="ctrlTxt"></p>
-      <p style="font-weight:bold;margin-bottom:4px">COMくんの強さ</p>
+      <p style="font-weight:bold;margin:10px 0 4px">COMくんの強さ</p>
       <div id="diffSel" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:6px">
         <button class="diffbtn" data-d="easy">よわい</button>
         <button class="diffbtn" data-d="normal">ふつう</button>
         <button class="diffbtn" data-d="hard">つよい</button>
         <button class="diffbtn" data-d="super">超つよい</button>
       </div>
-      <button class="bigbtn" id="btnStart">バトル開始！</button>
+      <button class="bigbtn" id="btnStart">バトル開始！</button><br>
+      <button class="bigbtn sub" id="btnPractice">🏫 れんしゅう</button>
     </div>
   </div>
 </div>
@@ -222,30 +281,135 @@
   </div>
 </div>
 
-<div class="overlay" id="pauseOv" style="display:none">
+<!-- 一時停止：盤面が見えるように背景はぼかさない -->
+<div class="overlay see" id="pauseOv" style="display:none">
   <div class="card">
-    <h1>⏸ きゅうけい中</h1>
-    <p id="pauseTxt">マウスが解放されたよ。<br>モニター間の移動もこのスキにどうぞ！</p>
-    <div class="volBox"></div>
-    <button class="bigbtn" id="btnResume">バトルに戻る</button>
-    <br><button class="bigbtn" style="background:linear-gradient(90deg,#9aa,#bcc);margin-top:8px;font-size:14px;padding:8px 20px" onclick="location.reload()">はじめから</button>
+    <h2>きゅうけい中</h2>
+    <p id="pauseTxt">マウスが解放されたよ。モニター間の移動もこのスキにどうぞ！</p>
+    <button class="bigbtn" id="btnResume">もどる</button>
+    <div class="btnRow">
+      <button class="pill" id="btnGuideP">📖 せつめい</button>
+      <button class="pill" id="btnSetP">⚙ せってい</button>
+    </div>
+    <button class="bigbtn gray" onclick="location.reload()">タイトルへ</button>
   </div>
 </div>
 
-<div class="overlay" id="volOv" style="display:none">
+<!-- せってい（音量・操作） -->
+<div class="overlay see top" id="setOv" style="display:none">
   <div class="card">
-    <h1>🔊 おんりょう</h1>
-    <div class="volBox"></div>
-    <button class="bigbtn" id="btnVolClose">OK</button>
+    <h2>⚙ せってい</h2>
+    <div class="setSec"><h3>🔊 おんりょう</h3><div class="volBox"></div></div>
+    <div class="setSec"><h3>🎮 そうさ</h3>
+      <div class="togRow"><span>カメラ 上下反転<small>上下に動かす向きを逆にする</small></span><button class="tog" data-s="invY" aria-label="カメラ上下反転"></button></div>
+      <div class="togRow"><span>カメラ 左右反転<small>左右に動かす向きを逆にする</small></span><button class="tog" data-s="invX" aria-label="カメラ左右反転"></button></div>
+      <div class="togRow"><span>ボタン配置 左右入れ替え<small>スマホ：スティックを右、ボタンを左に（左利き向け）</small></span><button class="tog" data-s="lefty" aria-label="ボタン配置左右入れ替え"></button></div>
+    </div>
+    <button class="bigbtn" id="btnSetClose">OK</button>
   </div>
 </div>
-<button id="btnMenu" style="display:none" aria-label="きゅうけい">⏸</button>
+
+<!-- せつめい・ずかん（れんしゅう中は文字やアイテムをここから出せる） -->
+<div class="overlay see top" id="guideOv" style="display:none">
+  <div class="card">
+    <h2 style="text-align:center">📖 せつめい</h2>
+    <div class="tabs">
+      <button class="tab practiceOnly" data-p="prac">🏫 れんしゅう</button>
+      <button class="tab" data-p="rule">あそびかた</button>
+      <button class="tab" data-p="ctrl">そうさ</button>
+      <button class="tab" data-p="type">相性</button>
+      <button class="tab" data-p="abc">文字ずかん</button>
+      <button class="tab" data-p="item">アイテム</button>
+    </div>
+
+    <div class="gpage" data-p="prac">
+      <div class="gbox">
+        <p style="margin:0">🏫 <b>れんしゅうモード</b><br>COMくんは動かない練習相手。HPが0になっても回復するよ。あなたはダメージを受けない。<br>「文字ずかん」「アイテム」タブの <b>だす</b> ボタンで、好きな文字やアイテムを目の前に出せる！</p>
+      </div>
+      <p style="font-weight:bold;margin-bottom:4px">COMくんにバリアを持たせる（ずっとガードする）</p>
+      <div class="btnRow" id="dummyShield" style="margin-top:4px">
+        <button class="pill" data-t="">なし</button>
+        <button class="pill" data-t="fire" style="color:#F52A2A">🔥 赤</button>
+        <button class="pill" data-t="grass" style="color:#3FA94C">🌿 緑</button>
+        <button class="pill" data-t="water" style="color:#1E9BE0">💧 青</button>
+      </div>
+      <p>相性で勝ってる色のたまを当てると、バリアが一撃でこわれるのを確かめてみよう。</p>
+    </div>
+
+    <div class="gpage" data-p="rule">
+      <div class="gbox">
+        <ul>
+          <li>空から<b>アルファベット</b>が降ってくる。近づくと、空いている手に<b>自動で持つ</b>よ。</li>
+          <li>右手＝<b>たま</b>（投げる用）、左手＝<b>バリア</b>（守る用）。</li>
+          <li>たまを相手に当てると<b>HPが減る</b>。先に相手のHPを0にしたら勝ち🏆</li>
+          <li>バリアを構えると<b>正面からの攻撃</b>を防げる。バリアは攻撃を受けると少しずつ削れる。</li>
+        </ul>
+      </div>
+      <p><b>持ちかえ</b>：「⇄ 左右こうかん」で、たまとバリアを入れかえられる（バリアの削れ具合はそのまま）。両手がいっぱいの時は、たまを投げて手を空けると次の文字を拾えるよ。</p>
+      <p><b>宝石</b>：ときどき中央に宝石が降ってくる。ふれると8秒間パワーアップ！（→アイテム）</p>
+      <p><b>文字ごとに性能がちがう</b>：重い文字は強いけど遅い、細い文字は速いけどバリアには弱い…など。（→文字ずかん）</p>
+    </div>
+
+    <div class="gpage" data-p="ctrl" id="ctrlPage"></div>
+
+    <div class="gpage" data-p="type">
+      <svg class="tri" viewBox="0 0 320 250" role="img" aria-label="赤は緑に強い、緑は青に強い、青は赤に強い">
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#FF5D8F"/></marker></defs>
+        <g stroke="#FF5D8F" stroke-width="4" fill="none" marker-end="url(#ah)">
+          <path d="M180,62 Q245,95 250,160"/>
+          <path d="M215,205 Q160,232 105,205"/>
+          <path d="M70,160 Q75,95 140,62"/>
+        </g>
+        <g font-size="13" font-weight="bold" fill="#FF5D8F" text-anchor="middle">
+          <text x="262" y="100">つよい</text><text x="160" y="240">つよい</text><text x="58" y="100">つよい</text>
+        </g>
+        <g text-anchor="middle" font-weight="bold">
+          <circle cx="160" cy="45" r="34" fill="#FFE3E3" stroke="#F52A2A" stroke-width="3"/><text x="160" y="42" font-size="24">🔥</text><text x="160" y="64" font-size="13" fill="#F52A2A">赤</text>
+          <circle cx="255" cy="190" r="34" fill="#E2F7E4" stroke="#4FC95D" stroke-width="3"/><text x="255" y="187" font-size="24">🌿</text><text x="255" y="209" font-size="13" fill="#3FA94C">緑</text>
+          <circle cx="65" cy="190" r="34" fill="#DFF3FF" stroke="#2FB6FF" stroke-width="3"/><text x="65" y="187" font-size="24">💧</text><text x="65" y="209" font-size="13" fill="#1E9BE0">青</text>
+        </g>
+      </svg>
+      <p style="text-align:center;font-weight:bold;margin-top:0">🔥赤 は 🌿緑 に強い ／ 🌿緑 は 💧青 に強い ／ 💧青 は 🔥赤 に強い</p>
+      <div class="gbox">
+        <p style="margin:0 0 4px;font-weight:bold">たまがバリアに当たったとき、バリアが削れる量</p>
+        <table class="mtable">
+          <tr><td>💥 相性で勝ってる色のたま</td><td style="color:#FF5D8F">一撃でこわれる</td></tr>
+          <tr><td>🟰 同じ色どうし</td><td>50%</td></tr>
+          <tr><td>💦 相性で負けてる色のたま</td><td>25%</td></tr>
+        </table>
+        <p style="margin:4px 0 0;font-size:13px">※ 50%・25%は、バリアにした文字のかたさでも変わる（かたい文字ほど削れにくい）。<br>※ バリアに当たらずHPに当たった時のダメージは、色に関係なく同じ。</p>
+      </div>
+    </div>
+
+    <div class="gpage" data-p="abc">
+      <div class="typeSel" id="spawnType">
+        <button data-t="fire" style="color:#F52A2A">🔥 赤</button>
+        <button data-t="grass" style="color:#3FA94C">🌿 緑</button>
+        <button data-t="water" style="color:#1E9BE0">💧 青</button>
+      </div>
+      <p style="margin-top:0;font-size:13px">バーが長いほど高い。<b>こうげき</b>＝当てた時のダメージ ／ <b>はやさ</b>＝投げた時の速さ ／ <b>のび</b>＝遠くまで失速しにくい ／ <b>かたさ</b>＝バリアにした時の強さ</p>
+      <div class="lgrid" id="letterGrid"></div>
+    </div>
+
+    <div class="gpage" data-p="item">
+      <p style="margin-top:0">宝石は、ときどき中央付近に降ってきて目の高さでふわふわ浮かぶ。ふれると取れるよ（COMくんも取りに来る！）。効果は<b>8秒間</b>。</p>
+      <div id="gemList"></div>
+    </div>
+
+    <div style="text-align:center"><button class="bigbtn" id="btnGuideClose">とじる</button></div>
+  </div>
+</div>
+
+<!-- スマホ：対戦中の小ボタン -->
+<div id="floatBtns">
+  <button class="fbtn" id="btnMenu" aria-label="きゅうけい">⏸</button>
+  <button class="fbtn practiceOnlyBtn" id="btnTools" aria-label="ずかん・文字をだす" style="display:none">🧰</button>
+</div>
 
 <div id="pad" style="display:none">
-  <button class="padbtn" id="btnGuard">バリア</button>
   <button class="padbtn" id="btnThrow">なげる</button>
-  <button class="padbtn" id="btnPickS">バリア<br>ひろう</button>
-  <button class="padbtn" id="btnPickW">たま<br>ひろう</button>
+  <button class="padbtn" id="btnSwap">⇄<br>左右こうかん</button>
+  <button class="padbtn" id="btnGuard">ぼうぎょ</button>
 </div>
 <div id="stick" style="display:none"><div id="stickKnob"></div></div>
 
@@ -270,12 +434,17 @@ const CAM = {
   pitchInit: 0.0,    // 開始時の上下角度
   pitchMin: -0.30,   // 下を向ける限界（相手と地面が見える範囲に絞る）
   pitchMax:  0.45,   // 上を向ける限界（山なりに投げたい時用）
-  dist: 3.2,         // キャラからの距離（後ろ）
-  height: 1.0,       // 目線からの高さ（上）
+  dist: 4.4,         // キャラからの距離（後ろ）
+  height: 1.35,      // 目線からの高さ（上）
   sensMouse: .0024,  // マウス感度
   sensTouch: .005,   // スマホ：右側ドラッグの感度
   sensAim: .004,     // スマホ：なげるボタンを押したままドラッグする時の感度
 };
+// プレイヤーごとの設定（せってい画面で変更、ブラウザに保存）
+const SET_KEY='abcyukigassen.settings';
+const SET={invY:false, invX:false, lefty:false};
+try{ const s=JSON.parse(localStorage.getItem(SET_KEY)||'null'); if(s) for(const k in SET) if(typeof s[k]==='boolean') SET[k]=s[k]; }catch(e){}
+function saveSet(){ try{ localStorage.setItem(SET_KEY,JSON.stringify(SET)); }catch(e){} }
 // 拾う：距離はすべて水平距離（カメラを下に向けなくても拾える）
 const PICK = {
   autoR: 1.4,        // この距離に入ったら、空いている手へ自動で拾う
@@ -512,6 +681,7 @@ const DIFFS={
   super :{label:'超つよい', moveMul:1.5,  throwMin:1.1, throwRand:1.0, aim:1.2, guardP:0.40, itemAggro:99},
 };
 let DIFF=DIFFS.normal; // スタート画面で選択
+let PRACTICE=false, dummyType=''; // れんしゅうモード／練習相手に持たせるバリアの色
 
 // COMの見た目（雪だるま⛄ 紫マフラー）
 { const g=buildSnowman(0x8E6CF0, false);
@@ -596,11 +766,69 @@ function showMsg(t,col='#fff'){ const m=$('msg'); m.textContent=t; m.style.color
   clearTimeout(msgT); msgT=setTimeout(()=>m.style.opacity=0,1400); }
 function flash(){ const f=$('flash'); f.style.opacity=1; setTimeout(()=>f.style.opacity=0,80); }
 
-// ============ ぴこぴこSFX ============
-let AC=null;
-function sfx(kind){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
-  const o=AC.createOscillator(),g=AC.createGain(); o.connect(g); g.connect(seOut());
-  const t=AC.currentTime; g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.001,t+.25);
+// ============ 音（効果音・BGM・音量） ============
+// iPhoneはアプリを閉じて戻ると AudioContext が壊れた状態（音程・リズムがおかしい、無音）になることがある。
+// なので画面を離れたら音の仕組みを丸ごと捨て、戻ってきたら作り直す。
+const BGM_FILES = { // 曲の差し替えはここだけ（sound/bgm/ に置いたファイル名）
+  title : 'sound/bgm/ABC Snow Battle.mp3',   // タイトル・リザルト
+  battle: 'sound/bgm/Snow Battle Loop.mp3',  // 対戦中
+};
+const VOL_KEY='abcyukigassen.volume';
+const VOL={bgm:0.6, se:0.8}; // 初期値（0〜1）
+try{ const v=JSON.parse(localStorage.getItem(VOL_KEY)||'null'); if(v){ if(v.bgm>=0&&v.bgm<=1) VOL.bgm=v.bgm; if(v.se>=0&&v.se<=1) VOL.se=v.se; } }catch(e){}
+// http(s)で開いた時はBGMもWeb Audio経由にする（iPhoneは<audio>の音量を変えられないため）
+const BGM_VIA_WEBAUDIO = location.protocol!=='file:';
+const snd={ac:null, se:null, bgmEl:null, bgmGain:null, cur:null, pos:{}, dead:false};
+function audioReady(){ // 必要になった時に作る（最初のタップ後）
+  if(snd.dead) return null;
+  try{
+    if(!snd.ac){
+      snd.ac=new (window.AudioContext||window.webkitAudioContext)();
+      snd.se=snd.ac.createGain(); snd.se.gain.value=VOL.se; snd.se.connect(snd.ac.destination);
+      snd.bgmEl=new Audio(); snd.bgmEl.loop=true; snd.bgmEl.preload='auto'; snd.bgmEl.setAttribute('playsinline','');
+      if(BGM_VIA_WEBAUDIO){ snd.bgmGain=snd.ac.createGain(); snd.bgmGain.gain.value=VOL.bgm;
+        snd.ac.createMediaElementSource(snd.bgmEl).connect(snd.bgmGain); snd.bgmGain.connect(snd.ac.destination); }
+      applyVol();
+    }
+    if(snd.ac.state!=='running') snd.ac.resume().catch(()=>{});
+  }catch(e){ return null; }
+  return snd.ac;
+}
+function teardownAudio(){ // 画面を離れた時：曲の位置を覚えて、全部捨てる
+  if(snd.bgmEl){ if(snd.cur) snd.pos[snd.cur]=snd.bgmEl.currentTime||0; snd.bgmEl.pause(); snd.bgmEl.removeAttribute('src'); try{ snd.bgmEl.load(); }catch(e){} }
+  if(snd.ac){ try{ snd.ac.close(); }catch(e){} }
+  snd.ac=snd.se=snd.bgmEl=snd.bgmGain=null;
+}
+let bgmWant=null; // 今流したい曲（title / battle）
+function playBgm(name){
+  bgmWant=name;
+  if(!audioReady()) return;
+  const el=snd.bgmEl;
+  if(snd.cur!==name || !el.src){
+    if(snd.cur && snd.cur!==name) snd.pos[snd.cur]=0; // 曲が変わったら前の曲は頭から
+    snd.cur=name; el.src=encodeURI(BGM_FILES[name]);
+    const t=snd.pos[name]||0; if(t>0) el.addEventListener('loadedmetadata',()=>{ try{ el.currentTime=t; }catch(e){} },{once:true});
+  }
+  const p=el.play(); if(p&&p.catch) p.catch(()=>{});
+}
+function applyVol(){
+  if(snd.se) snd.se.gain.value=VOL.se;
+  if(snd.bgmEl){ if(snd.bgmGain){ snd.bgmGain.gain.value=VOL.bgm; snd.bgmEl.volume=1; } else snd.bgmEl.volume=VOL.bgm; }
+  document.querySelectorAll('.volRow').forEach(r=>{ const k=r.dataset.k;
+    r.querySelector('input').value=Math.round(VOL[k]*100); r.querySelector('.vv').textContent=Math.round(VOL[k]*100)+'%'; });
+}
+// 最初のタップ／クリック、画面に戻ってきた後のタップで音を（作り直して）鳴らす
+function kickAudio(){ if(document.hidden) return; audioReady(); if(bgmWant && snd.bgmEl && snd.bgmEl.paused) playBgm(bgmWant); }
+addEventListener('pointerdown',()=>{ if(!bgmWant) bgmWant='title'; kickAudio(); },true);
+addEventListener('keydown',()=>{ if(!bgmWant) bgmWant='title'; kickAudio(); },true);
+addEventListener('touchend',kickAudio,true); // iOSは touchend でないと再生許可が下りないことがある
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) teardownAudio(); else kickAudio(); });
+addEventListener('pagehide',teardownAudio);
+addEventListener('pageshow',e=>{ if(e.persisted){ teardownAudio(); kickAudio(); } });
+
+function sfx(kind){ const ac=audioReady(); if(!ac) return; try{
+  const o=ac.createOscillator(),g=ac.createGain(); o.connect(g); g.connect(snd.se);
+  const t=ac.currentTime; g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.001,t+.25);
   if(kind==='throw'){o.type='triangle';o.frequency.setValueAtTime(500,t);o.frequency.exponentialRampToValueAtTime(900,t+.15);}
   if(kind==='block'){o.type='square';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(150,t+.2);}
   if(kind==='break'){o.type='sawtooth';o.frequency.setValueAtTime(600,t);o.frequency.exponentialRampToValueAtTime(80,t+.3);}
@@ -609,46 +837,14 @@ function sfx(kind){ try{ AC=AC||new (window.AudioContext||window.webkitAudioCont
   if(kind==='land'){o.type='triangle';g.gain.setValueAtTime(.05,t);o.frequency.setValueAtTime(260,t);o.frequency.exponentialRampToValueAtTime(120,t+.12);}
   o.start(t); o.stop(t+.3);}catch(e){} }
 // キラキラ和音（宝石の登場・取得用）
-function chime(notes,gainV=0.10,step=0.07){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
-  const t0=AC.currentTime;
-  notes.forEach((f,i)=>{ const o=AC.createOscillator(),g=AC.createGain();
-    o.type='triangle'; o.connect(g); g.connect(seOut());
+function chime(notes,gainV=0.10,step=0.07){ const ac=audioReady(); if(!ac) return; try{
+  const t0=ac.currentTime;
+  notes.forEach((f,i)=>{ const o=ac.createOscillator(),g=ac.createGain();
+    o.type='triangle'; o.connect(g); g.connect(snd.se);
     const t=t0+i*step; g.gain.setValueAtTime(gainV,t); g.gain.exponentialRampToValueAtTime(.001,t+.35);
     o.frequency.setValueAtTime(f,t); o.start(t); o.stop(t+.4); });
 }catch(e){} }
 
-// ============ 音量・BGM ============
-// 曲の差し替えはここだけ（sound/bgm/ に置いたファイル名）
-const BGM_FILES = {
-  title : 'sound/bgm/ABC Snow Battle.mp3',   // タイトル・リザルト
-  battle: 'sound/bgm/Snow Battle Loop.mp3',  // 対戦中
-};
-const VOL_KEY='abcyukigassen.volume';
-const VOL={bgm:0.6, se:0.8}; // 初期値（0〜1）
-try{ const v=JSON.parse(localStorage.getItem(VOL_KEY)||'null'); if(v){ if(v.bgm>=0&&v.bgm<=1) VOL.bgm=v.bgm; if(v.se>=0&&v.se<=1) VOL.se=v.se; } }catch(e){}
-let seGain=null;
-function seOut(){ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
-  if(!seGain){ seGain=AC.createGain(); seGain.gain.value=VOL.se; seGain.connect(AC.destination); }
-  return seGain; }
-// BGMは<audio>で再生。http(s)で開いた時はWeb Audio経由にする（iPhoneは<audio>の音量を変えられないため）
-const bgmEl=new Audio(); bgmEl.loop=true; bgmEl.preload='auto';
-let bgmGain=null, bgmCur=null;
-const BGM_VIA_WEBAUDIO = location.protocol!=='file:';
-function applyVol(){
-  if(seGain) seGain.gain.value=VOL.se;
-  if(bgmGain){ bgmGain.gain.value=VOL.bgm; bgmEl.volume=1; } else bgmEl.volume=VOL.bgm;
-  document.querySelectorAll('.volRow').forEach(r=>{ const k=r.dataset.k;
-    r.querySelector('input').value=Math.round(VOL[k]*100); r.querySelector('.vv').textContent=Math.round(VOL[k]*100)+'%'; });
-}
-function playBgm(name){
-  // 初回のタップ／クリック後でないとブラウザが再生を許可しない
-  try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended') AC.resume();
-    if(BGM_VIA_WEBAUDIO && !bgmGain){ bgmGain=AC.createGain(); AC.createMediaElementSource(bgmEl).connect(bgmGain); bgmGain.connect(AC.destination); }
-  }catch(e){}
-  applyVol();
-  if(bgmCur!==name){ bgmCur=name; bgmEl.src=encodeURI(BGM_FILES[name]); bgmEl.currentTime=0; }
-  const p=bgmEl.play(); if(p&&p.catch) p.catch(()=>{});
-}
 // 音量スライダー（.volBox を置いた場所すべてに同じものを出す）
 document.querySelectorAll('.volBox').forEach(box=>{
   box.innerHTML=[['bgm','🎵 BGM'],['se','🔔 効果音']].map(([k,l])=>
@@ -661,11 +857,6 @@ document.querySelectorAll('.volRow input').forEach(inp=>{
   if(k==='se') inp.addEventListener('change',()=>sfx('pick')); // 効果音は離した時に試し鳴らし
 });
 applyVol();
-// タイトル画面：最初に触った時点でタイトル曲を流す
-{ const unlock=()=>{ if(!bgmCur) playBgm('title'); removeEventListener('pointerdown',unlock,true); removeEventListener('keydown',unlock,true); };
-  addEventListener('pointerdown',unlock,true); addEventListener('keydown',unlock,true); }
-// 画面を離れたら止める（スマホでホームに戻った時など）
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) bgmEl.pause(); else if(bgmCur){ const p=bgmEl.play(); if(p&&p.catch) p.catch(()=>{}); } });
 
 // ============ 投擲物 ============
 const projectiles=[];
@@ -723,6 +914,7 @@ function resolveHit(p, victim, isPlayer){
     if(isPlayer){ flash(); showMsg('-'+dmgFinal+' くらった！','#FF8FA8'); }
     else showMsg('ヒット！ -'+dmgFinal,'#A8FFC2');
   }
+  if(PRACTICE && victim.hp<=0){ victim.hp=100; setTimeout(()=>showMsg('COMくん かいふく！','#fff'),700); }
   updHP(); updSlots();
   if(victim.hp<=0) endGame(!isPlayer);
 }
@@ -730,22 +922,25 @@ function resolveHit(p, victim, isPlayer){
 // ============ 入力（PC） ============
 // WASD：移動 / マウス：視点 / 左クリック：投げる / 右クリック長押し：ガード / E：たまにする / Q：バリアにする
 const clampPitch=p=>Math.max(CAM.pitchMin,Math.min(CAM.pitchMax,p));
+// 視点を動かす（せっていの上下・左右反転を反映）
+function turnView(dx,dy,sens){
+  player.yaw-=dx*sens*(SET.invX?-1:1);
+  player.pitch=clampPitch(player.pitch-dy*sens*(SET.invY?-1:1));
+}
 const keys={};
 addEventListener('keydown',e=>{keys[e.code]=true;
   if(e.repeat) return; // 押しっぱなしで交換が往復しないように
   if(e.code==='KeyE') tryPick('weapon');
-  if(e.code==='KeyQ') tryPick('shield');});
+  if(e.code==='KeyQ') tryPick('shield');
+  if(e.code==='KeyR') playerSwap();});
 addEventListener('keyup',e=>keys[e.code]=false);
 let locked=false, paused=false;
 if(!IS_TOUCH){
   renderer.domElement.addEventListener('click',()=>{ if(running&&!locked&&!paused) renderer.domElement.requestPointerLock(); });
   document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===renderer.domElement;
-    if(!locked && running && !paused){ paused=true; player.guard=false;
-      document.body.classList.remove('guarding','guardEmpty'); $('pauseOv').style.display='flex'; }});
-  $('btnResume').addEventListener('click',()=>{ $('pauseOv').style.display='none'; paused=false;
-    last=performance.now(); renderer.domElement.requestPointerLock(); });
+    if(!locked && running && !paused) pauseGame(true); });
   addEventListener('mousemove',e=>{ if(!locked)return;
-    player.yaw-=e.movementX*CAM.sensMouse; player.pitch=clampPitch(player.pitch-e.movementY*CAM.sensMouse); });
+    turnView(e.movementX,e.movementY,CAM.sensMouse); });
   addEventListener('mousedown',e=>{ if(!locked||!running)return;
     if(e.button===0) playerThrow();
     if(e.button===2) player.guard=true; });
@@ -771,12 +966,13 @@ if(IS_TOUCH){
     stickVec={x:dx/smax,y:dy/smax};}e.preventDefault();},{passive:false});
   const endS=e=>{for(const t of e.changedTouches){if(t.identifier===sid){sid=null;stickVec={x:0,y:0};knob.style.transform='';}}};
   stick.addEventListener('touchend',endS); stick.addEventListener('touchcancel',endS);
-  // 右側ドラッグで視点
+  // ボタン側（通常は右、左利き設定なら左）のドラッグで視点
   let lid=null,lp={x:0,y:0};
+  const inLookSide=x=> SET.lefty ? x<innerWidth*.58 : x>innerWidth*.42;
   addEventListener('touchstart',e=>{for(const t of e.changedTouches){
-    if(t.clientX>innerWidth*.42 && t.target===renderer.domElement && lid===null){lid=t.identifier;lp={x:t.clientX,y:t.clientY};}}},{passive:false});
+    if(inLookSide(t.clientX) && t.target===renderer.domElement && lid===null){lid=t.identifier;lp={x:t.clientX,y:t.clientY};}}},{passive:false});
   addEventListener('touchmove',e=>{for(const t of e.changedTouches){if(t.identifier!==lid)continue;
-    player.yaw-=(t.clientX-lp.x)*CAM.sensTouch; player.pitch=clampPitch(player.pitch-(t.clientY-lp.y)*CAM.sensTouch);
+    turnView(t.clientX-lp.x,t.clientY-lp.y,CAM.sensTouch);
     lp={x:t.clientX,y:t.clientY};}},{passive:false});
   const endL=e=>{for(const t of e.changedTouches){if(t.identifier===lid)lid=null;}};
   addEventListener('touchend',endL); addEventListener('touchcancel',endL);
@@ -795,7 +991,7 @@ if(IS_TOUCH){
     document.body.classList.add('aiming'); $('btnThrow').classList.add('held');},{passive:false});
   $('btnThrow').addEventListener('touchmove',e=>{e.preventDefault();
     for(const t of e.changedTouches){ if(t.identifier!==aim.id) continue;
-      player.yaw-=(t.clientX-aim.lx)*CAM.sensAim; player.pitch=clampPitch(player.pitch-(t.clientY-aim.ly)*CAM.sensAim);
+      turnView(t.clientX-aim.lx,t.clientY-aim.ly,CAM.sensAim);
       aim.lx=t.clientX; aim.ly=t.clientY;
       aim.overCancel=isOverCancel(t.clientX,t.clientY); cancelEl.classList.toggle('hot',aim.overCancel); }},{passive:false});
   $('btnThrow').addEventListener('touchend',e=>{ for(const t of e.changedTouches){ if(t.identifier!==aim.id) continue;
@@ -806,8 +1002,7 @@ if(IS_TOUCH){
   $('btnGuard').addEventListener('touchstart',e=>{e.preventDefault();player.guard=true;},{passive:false});
   $('btnGuard').addEventListener('touchend',()=>player.guard=false);
   $('btnGuard').addEventListener('touchcancel',()=>player.guard=false);
-  $('btnPickW').addEventListener('touchstart',e=>{e.preventDefault();tryPick('weapon');},{passive:false});
-  $('btnPickS').addEventListener('touchstart',e=>{e.preventDefault();tryPick('shield');},{passive:false});
+  $('btnSwap').addEventListener('touchstart',e=>{e.preventDefault();playerSwap();},{passive:false});
 }
 
 // ============ アクション ============
@@ -843,7 +1038,20 @@ function equipFromField(g, slot, auto){
   if(prev){ const d=dropLetterAt(prev.ch,prev.type,prevDur,px,pz); d.userData.noAuto=true; }
   if(g===nearLetter) nearLetter=null;
   sfx('pick'); updSlots();
-  if(auto) showMsg(TYPES[incoming.type].emoji+' '+incoming.ch+(slot==='weapon'?' をたまに！':' をバリアに！'), TYPES[incoming.type].css);
+  // 拾った手の欄を一瞬はねさせる（画面中央のメッセージは出さない）
+  const el=$(slot==='weapon'?'slotW':'slotS'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+}
+// 左右こうかん：たまとバリアを持ちかえる（バリアの削れ具合はそのまま引き継ぐ）
+function playerSwap(){
+  if(!running||paused) return;
+  const w=player.weapon, s=player.shield;
+  if(!w && !s) return;
+  player.weapon = s ? {ch:s.ch, type:s.type, dur:player.shieldHP} : null;
+  player.shield = w ? {ch:w.ch, type:w.type, dur:w.dur} : null;
+  player.shieldHP = w ? (w.dur===undefined?100:w.dur) : 0;
+  setHand(handW,player.weapon,0.21); setHand(handS,player.shield,0.21,true);
+  sfx('pick'); updSlots();
+  for(const id of ['slotW','slotS']){ const el=$(id); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 }
 function tryPick(slot){
   if(!nearLetter||!running) return;
@@ -858,7 +1066,8 @@ function autoPick(){
     if(slot && d<PICK.autoR){ equipFromField(f, slot, true); return; } }
 }
 
-function setLetterOpacity(g,op){ g.traverse(o=>{ if(o.material){ o.material.transparent=op<1; o.material.opacity=op; } }); }
+// 拾う対象の点滅：半透明にすると球と円柱のつなぎ目が透けて見えるので、不透明のまま白く光らせる
+function setLetterGlow(g,k){ g.traverse(o=>{ if(o.material && o.material.emissive) o.material.emissive.setRGB(k,k,k); }); }
 
 // 拾う対象マーカー（文字の頭上でくるくる回る逆三角）
 const targetMark=new THREE.Group();
@@ -890,6 +1099,7 @@ function updGuardFx(dt){
 
 // ============ COM AI ============
 function comAI(dt){
+  if(PRACTICE){ dummyAI(dt); return; }
   com.timer-=dt;
   const toPlayer=player.pos.clone().setY(0).sub(com.pos.clone().setY(0));
   const dist=toPlayer.length();
@@ -954,7 +1164,7 @@ function endGame(playerWon){
   document.body.classList.remove('aiming','guarding','guardEmpty');
   $('endTitle').textContent = playerWon?'🏆 WIN!':'😵 LOSE...';
   $('endTxt').textContent = playerWon?'COMくんに勝った！すごい！🎉':'次はタイプ相性でバリアを砕こう…！';
-  $('endOv').style.display='flex'; $('btnMenu').style.display='none'; playBgm('title');
+  $('endOv').style.display='flex'; $('floatBtns').style.display='none'; playBgm('title');
   if(document.pointerLockElement) document.exitPointerLock();
 }
 function loop(){
@@ -1061,25 +1271,22 @@ function loop(){
   nearLetter=null; let nd=PICK.manualR;
   for(const f of fieldLetters){ if(!f.userData.landed)continue;
     const d=hDist(f,player.pos);if(d<nd){nd=d;nearLetter=f;}}
-  if(prevNear && prevNear!==nearLetter) setLetterOpacity(prevNear,1); // 前の対象の点滅を戻す
+  if(prevNear && prevNear!==nearLetter) setLetterGlow(prevNear,0); // 前の対象の点滅を戻す
   const tip=$('pickupTxt');
   if(nearLetter){ const u=nearLetter.userData, st=LETTERS[u.ch];
     tip.style.display='inline-block';
     const wTxt=player.weapon?'たまと交換':'たまにする', sTxt=player.shield?'バリアと交換':'バリアにする';
     tip.innerHTML=`${TYPES[u.type].emoji} <b style="color:${TYPES[u.type].css}">${u.ch}</b>：${st.trait}` +
-      (IS_TOUCH?'':`<br><b>E</b> ${wTxt} ／ <b>Q</b> ${sTxt}`);
-    const blink=0.45+Math.abs(Math.sin(performance.now()*0.006))*0.55; // やさしい点滅
-    setLetterOpacity(nearLetter,blink);
+      (!IS_TOUCH?`<br><b>E</b> ${wTxt} ／ <b>Q</b> ${sTxt}`
+        : (player.weapon&&player.shield)?'<br><small>両手がいっぱい。投げて手を空けると拾えるよ</small>':'');
+    setLetterGlow(nearLetter, 0.08+Math.abs(Math.sin(performance.now()*0.006))*0.32); // やさしい点滅
     // 頭上のマーカー（カメラを下に向けなくても、どれが対象か分かる）
     targetMark.visible=true;
     targetMark.position.set(nearLetter.position.x, 1.15+Math.sin(performance.now()*0.005)*0.12, nearLetter.position.z);
     targetMark.rotation.y+=dt*2.5;
     targetMark.userData.setColor(TYPES[u.type].color);
-    if(IS_TOUCH){$('btnPickW').style.opacity='1';$('btnPickS').style.opacity='1';
-      $('btnPickW').innerHTML=player.weapon?'たま<br>こうかん':'たま<br>ひろう';
-      $('btnPickS').innerHTML=player.shield?'バリア<br>こうかん':'バリア<br>ひろう';}
-  } else { tip.style.display='none'; targetMark.visible=false;
-    if(IS_TOUCH){$('btnPickW').style.opacity='0.4';$('btnPickS').style.opacity='0.4';} }
+  } else { tip.style.display='none'; targetMark.visible=false; }
+  if(IS_TOUCH) $('btnSwap').style.opacity=(player.weapon||player.shield)?'1':'0.45';
 
   // COM
   comAI(dt);
@@ -1116,40 +1323,154 @@ function loop(){
 }
 loop();
 
+// ============ 一時停止・画面（オーバーレイ）の出し入れ ============
+const show=(id,on)=>{ $(id).style.display=on?'flex':'none'; };
+const isShown=id=>$(id).style.display!=='none';
+function clearInputs(){
+  player.guard=false; stickVec={x:0,y:0}; aim.id=null; for(const k in keys) keys[k]=false;
+  $('stickKnob').style.transform=''; $('btnThrow').classList.remove('held'); $('aimCancel').classList.remove('hot');
+  document.body.classList.remove('guarding','guardEmpty','aiming');
+}
+function pauseGame(withMenu=true){
+  if(!running||paused) return;
+  paused=true; clearInputs();
+  if(withMenu) show('pauseOv',true);
+  if(document.pointerLockElement) document.exitPointerLock();
+}
+function resumeGame(){
+  show('pauseOv',false); show('guideOv',false); show('setOv',false);
+  paused=false; last=performance.now();
+  if(!IS_TOUCH && running) renderer.domElement.requestPointerLock();
+}
+$('btnResume').addEventListener('click',resumeGame);
+$('btnMenu').addEventListener('click',()=>pauseGame(true));
+$('btnTools').addEventListener('click',()=>{ pauseGame(false); openGuide('abc'); });
+// PC：Tabキーで せつめい（れんしゅう中は文字・アイテムを出す画面）
+addEventListener('keydown',e=>{ if(e.code!=='Tab') return; e.preventDefault();
+  if(isShown('guideOv')) closeGuide(); else if(running){ pauseGame(false); openGuide(PRACTICE?'abc':'rule'); } else openGuide('rule'); });
+
+// ============ せってい ============
+function applySet(){
+  document.querySelectorAll('.tog').forEach(b=>b.classList.toggle('on',!!SET[b.dataset.s]));
+  document.body.classList.toggle('lefty',SET.lefty);
+}
+document.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{
+  SET[b.dataset.s]=!SET[b.dataset.s]; saveSet(); applySet(); sfx('pick'); }));
+applySet();
+$('btnSetT').addEventListener('click',()=>show('setOv',true));
+$('btnSetP').addEventListener('click',()=>show('setOv',true));
+$('btnSetClose').addEventListener('click',()=>show('setOv',false));
+
+// ============ せつめい・ずかん ============
+function openGuide(page){ showTab(page); show('guideOv',true); $('guideOv').querySelector('.card').scrollTop=0; }
+function closeGuide(){ show('guideOv',false);
+  if(running && paused && !isShown('pauseOv')) resumeGame(); } // 🧰から開いた時はそのままバトルへ戻る
+function showTab(p){
+  document.querySelectorAll('#guideOv .tab').forEach(t=>t.classList.toggle('sel',t.dataset.p===p));
+  document.querySelectorAll('#guideOv .gpage').forEach(g=>g.classList.toggle('sel',g.dataset.p===p));
+}
+document.querySelectorAll('#guideOv .tab').forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.p)));
+$('btnGuideT').addEventListener('click',()=>openGuide('rule'));
+$('btnGuideP').addEventListener('click',()=>openGuide(PRACTICE?'prac':'rule'));
+$('btnGuideClose').addEventListener('click',closeGuide);
+
+// そうさ（今の端末のほうを先に）
+{ const pc=`<div class="gbox"><p style="margin:0 0 4px;font-weight:bold">🖱️ パソコン</p><ul>
+    <li><b class="k">W</b><b class="k">A</b><b class="k">S</b><b class="k">D</b> 移動</li>
+    <li>マウス：視点（画面をクリックするとマウスが固定される）</li>
+    <li>左クリック：<b>投げる</b></li>
+    <li>右クリック長押し：<b>ガード</b></li>
+    <li><b class="k">R</b> 左右こうかん（たまとバリアを持ちかえ）</li>
+    <li><b class="k">E</b> 近くの文字をたまに／<b class="k">Q</b> バリアに（持ってる物と取りかえ）</li>
+    <li><b class="k">Tab</b> せつめい（れんしゅう中は文字・アイテムを出す）</li>
+    <li><b class="k">ESC</b> きゅうけい（マウスが自由になる）</li></ul></div>`;
+  const sp=`<div class="gbox"><p style="margin:0 0 4px;font-weight:bold">📱 スマホ</p><ul>
+    <li>スティック：移動</li>
+    <li>ボタン側の画面をドラッグ：視点</li>
+    <li>「なげる」を押したままドラッグでねらって、<b>はなすと投げる</b>。<br>上に出る ✕ の上ではなすとキャンセル</li>
+    <li>「⇄ 左右こうかん」：たまとバリアを持ちかえる</li>
+    <li>「ぼうぎょ」を押している間：<b>ガード</b></li>
+    <li>⏸：きゅうけい　🧰：文字・アイテムを出す（れんしゅう中）</li></ul></div>`;
+  $('ctrlPage').innerHTML=(IS_TOUCH?sp+pc:pc+sp)+
+    '<p>文字に近づくと、空いている手に自動で持つ（両手が空いてたら先にたま）。両手がいっぱいの時は、投げて手を空けてから拾おう。バリアにしたい文字がたまの手にある時は「左右こうかん」。</p>'+
+    '<p>⚙ せってい で、カメラの上下・左右反転や、ボタン配置の左右入れ替え（左利き向け）ができるよ。</p>'; }
+
+// 文字ずかん：性能バー（最小〜最大を0〜100%に）
+let spawnType='fire';
+function bar(v,lo,hi,col){ const p=Math.round(Math.max(.08,Math.min(1,(v-lo)/(hi-lo)))*100); return `<i><b style="width:${p}%;background:${col}"></b></i>`; }
+function renderLetterGrid(){
+  const col=TYPES[spawnType].css;
+  $('letterGrid').innerHTML=LKEYS.map(ch=>{ const s=LETTERS[ch];
+    return `<div class="lcard"><div class="lh"><span class="lch" style="color:${PRACTICE?col:'#555'}">${ch}</span><span class="ltr">${s.trait}</span></div>`+
+      `<div class="stat">こうげき${bar(s.dmg,16,30,'#FF5D8F')}</div>`+
+      `<div class="stat">はやさ${bar(s.spd,17,30,'#FFB13D')}</div>`+
+      `<div class="stat">のび${bar(.17-s.drag,0,.16,'#5DD66B')}</div>`+
+      `<div class="stat">かたさ${bar(s.def,.45,1.3,'#4FA8FF')}</div>`+
+      `<button class="spawnBtn" data-ch="${ch}" style="background:${col}">だす</button></div>`; }).join('');
+  document.querySelectorAll('#spawnType button').forEach(b=>b.classList.toggle('sel',b.dataset.t===spawnType));
+}
+$('letterGrid').addEventListener('click',e=>{ const b=e.target.closest('.spawnBtn'); if(!b) return;
+  spawnInFront(b.dataset.ch, spawnType); });
+document.querySelectorAll('#spawnType button').forEach(b=>b.addEventListener('click',()=>{ spawnType=b.dataset.t; renderLetterGrid(); }));
+renderLetterGrid();
+// アイテム
+{ const desc={speed:'移動が <b>1.5倍</b> の速さに（ガード中も速くなる）', atk:'当てた時のダメージが <b>1.25倍</b>', def:'バリアが <b>1.5倍</b> かたくなる＋直接くらうダメージを <b>30%カット</b>'};
+  $('gemList').innerHTML=GKEYS.map(k=>`<div class="gemRow"><span class="ge">${GEMS[k].emoji}</span><span class="gt"><b style="color:${GEMS[k].css}">${GEMS[k].label}</b><br>${desc[k]}</span>`+
+    `<button class="spawnBtn" data-g="${k}" style="background:${GEMS[k].css}">だす</button></div>`).join('');
+  $('gemList').addEventListener('click',e=>{ const b=e.target.closest('.spawnBtn'); if(b) spawnGemInFront(b.dataset.g); }); }
+
+// ============ れんしゅうモード ============
+function frontPos(d){ const x=player.pos.x-Math.sin(player.yaw)*d, z=player.pos.z-Math.cos(player.yaw)*d;
+  const r=Math.hypot(x,z), m=ARENA_R-1.5; return r>m?{x:x*m/r,z:z*m/r}:{x,z}; }
+function spawnInFront(ch,type){ if(!running) return;
+  const p=frontPos(2.2); dropLetterAt(ch,type,100,p.x,p.z); sfx('land');
+  closeGuide(); showMsg(TYPES[type].emoji+' '+ch+' をだしたよ',TYPES[type].css); }
+function spawnGemInFront(kind){ if(!running) return;
+  const p=frontPos(3.0), g=buildGem(kind); g.position.set(p.x,1.5,p.z);
+  g.userData.vy=0; g.userData.landed=true; g.userData.bob=0; scene.add(g); gems.push(g);
+  chime([2349,2093,1760,1568,1319,1047],0.10,0.05); closeGuide(); }
+function giveDummyShield(){
+  if(!dummyType){ com.shield=null; com.shieldHP=0; setHand(com.handS,null); }
+  else { com.shield={ch:'H',type:dummyType}; com.shieldHP=100; setHand(com.handS,com.shield,0.18,true); }
+  com.reT=null; updSlots();
+}
+document.querySelectorAll('#dummyShield button').forEach(b=>b.addEventListener('click',()=>{
+  dummyType=b.dataset.t; giveDummyShield(); sfx('pick');
+  document.querySelectorAll('#dummyShield button').forEach(x=>x.style.boxShadow=x===b?'0 0 0 3px currentColor inset':''); }));
+// 練習相手：動かない・投げない。バリアを持たせたら常にガード、こわれたら少しして復活
+function dummyAI(dt){
+  const dx=player.pos.x-com.pos.x, dz=player.pos.z-com.pos.z;
+  com.yaw=Math.atan2(dx,dz); com.mesh.rotation.y=com.yaw; com.mesh.position.copy(com.pos);
+  com.guard=!!com.shield;
+  if(dummyType && !com.shield){ if(com.reT==null) com.reT=1.5; com.reT-=dt; if(com.reT<=0) giveDummyShield(); }
+}
+
 // ============ スタート ============
-$('ctrlTxt').innerHTML = IS_TOUCH
- ? '🕹️ 左スティック：移動　／　右側ドラッグ：視点<br>「なげる」を押したままドラッグでねらって、はなすと投げる<br>（右上の ✕ で離すとキャンセル）　「バリア」長押し：ガード<br>文字に近づくと空いてる手に自動で持つ。交換は「ひろう」ボタン'
- : '🖱️ クリックで視点ロック　WASD：移動　マウス：視点<br>左クリック：投げる　右クリック長押し：ガード<br>文字に近づくと空いてる手に自動で持つ<br>交換は E=たま / Q=バリア<br><small>※対戦中はマウスが画面に固定されます。<b>ESC</b>で解放、クリックで再開</small>';
-// 難易度選択
 const diffBtns=document.querySelectorAll('.diffbtn');
 function selectDiff(key){ DIFF=DIFFS[key];
   diffBtns.forEach(b=>b.classList.toggle('sel', b.dataset.d===key)); }
 diffBtns.forEach(b=>b.addEventListener('click',()=>{ selectDiff(b.dataset.d); sfx('pick'); }));
 selectDiff('normal'); // 初期は「ふつう」
 
-$('btnStart').addEventListener('click',()=>{
-  $('titleOv').style.display='none'; running=true; sfx('pick'); playBgm('battle');
-  if(IS_TOUCH) $('btnMenu').style.display='block';
-  if(!IS_TOUCH) renderer.domElement.requestPointerLock();
-});
+function startGame(practice){
+  PRACTICE=practice; document.body.classList.toggle('practice',practice);
+  if(practice){ com.pos.set(0,0,-5); com.mesh.position.copy(com.pos);
+    document.querySelector('#cHp .hpName').textContent='COMくん（れんしゅう）⛄';
+    $('btnTools').style.display='inline-block'; renderLetterGrid(); }
+  show('titleOv',false); running=true; sfx('pick'); playBgm('battle');
+  if(IS_TOUCH){ $('floatBtns').style.display='flex'; $('pauseTxt').textContent='ひと休み。盤面をよく見て作戦を立てよう'; }
+  else if(!practice) renderer.domElement.requestPointerLock();
+  if(practice){ pauseGame(false); openGuide('prac'); } // まずは使い方を見せる（閉じるとマウス固定して開始）
+}
+$('btnStart').addEventListener('click',()=>startGame(false));
+$('btnPractice').addEventListener('click',()=>startGame(true));
 updSlots(); updHP();
 // 「拾える」ヒントをHUDのすぐ下に置く（HUDの高さは画面サイズ・バフ表示で変わる）
 { const hud=$('hpWrap');
   const place=()=>document.documentElement.style.setProperty('--hudBottom',(hud.getBoundingClientRect().bottom+8)+'px');
   place(); if(window.ResizeObserver) new ResizeObserver(place).observe(hud); addEventListener('resize',place); }
-// 音量設定（タイトルの🔊）
-$('btnVolOpen').addEventListener('click',()=>{ $('volOv').style.display='flex'; });
-$('btnVolClose').addEventListener('click',()=>{ $('volOv').style.display='none'; });
-// スマホ：対戦中の⏸ボタンで一時停止（音量もここで変えられる）
-if(IS_TOUCH){
-  $('pauseTxt').innerHTML='ひと休み。音量もここで変えられるよ';
-  $('btnMenu').addEventListener('click',()=>{ if(!running||paused) return;
-    paused=true; player.guard=false; stickVec={x:0,y:0}; aim.id=null; document.body.classList.remove('guarding','guardEmpty','aiming');
-    $('pauseOv').style.display='flex'; });
-  $('btnResume').addEventListener('click',()=>{ $('pauseOv').style.display='none'; paused=false; last=performance.now(); });
-}
 // 動作確認用（URLに ?debug=1 のときだけ内部状態を触れるようにする）
-if(Q.has('debug')) window.__g={player,com,fieldLetters,dropLetterAt,PICK,CAM};
+if(Q.has('debug')) window.__g={player,com,fieldLetters,dropLetterAt,PICK,CAM,SET,snd};
 // テスト版の目印（test.html で開いたときだけ）
 if(/test\.html$/i.test(location.pathname)) $('testBadge').style.display='block';
 })();
