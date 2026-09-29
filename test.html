@@ -515,8 +515,8 @@
 <div id="wlabels"></div>
 <div id="nearArrow"><div class="ar"></div><div class="lt"></div></div>
 <div id="floatBtns">
-  <button class="fbtn" id="btnMenu" aria-label="きゅうけい">⏸</button>
   <button class="fbtn practiceOnlyBtn" id="btnTools" aria-label="ずかん・文字をだす" style="display:none">🧰</button>
+  <button class="fbtn" id="btnMenu" aria-label="きゅうけい">⏸</button>
 </div>
 
 <div id="pad" style="display:none">
@@ -549,6 +549,9 @@ const CAM = {
   pitchMax:  0.45,   // 上を向ける限界（山なりに投げたい時用）
   dist: 4.4,         // キャラからの距離（後ろ）
   height: 1.35,      // 目線からの高さ（上）
+  sidePortrait: 0.5, // 縦画面：カメラを右肩側へずらす（自分が左寄りに映り、右手のたまがボタンに隠れない）
+  handPortrait: 1.05,// 縦画面：手に持つ文字の横の離れ具合（横画面は1.5）
+  aimMeet: 12,       // 縦画面：照準と投げる線が交わる距離（ずらした分の狙いのズレを打ち消す）
   sensMouse: .0024,  // マウス感度
   sensTouch: .005,   // スマホ：右側ドラッグの感度
   sensAim: .004,     // スマホ：なげるボタンを押したままドラッグする時の感度
@@ -938,40 +941,57 @@ const VOL={bgm:0.6, se:0.8}; // 初期値（0〜1）
 try{ const v=JSON.parse(localStorage.getItem(VOL_KEY)||'null'); if(v){ if(v.bgm>=0&&v.bgm<=1) VOL.bgm=v.bgm; if(v.se>=0&&v.se<=1) VOL.se=v.se; } }catch(e){}
 // http(s)で開いた時はBGMもWeb Audio経由にする（iPhoneは<audio>の音量を変えられないため）
 const BGM_VIA_WEBAUDIO = location.protocol!=='file:';
-const snd={ac:null, se:null, bgmEl:null, bgmGain:null, cur:null, pos:{}, dead:false};
+const snd={ac:null, se:null, tracks:null, cur:null, pos:{}, dead:false};
 function audioReady(){ // 必要になった時に作る（最初のタップ後）
   if(snd.dead) return null;
   try{
     if(!snd.ac){
       snd.ac=new (window.AudioContext||window.webkitAudioContext)();
       snd.se=snd.ac.createGain(); snd.se.gain.value=VOL.se; snd.se.connect(snd.ac.destination);
-      snd.bgmEl=new Audio(); snd.bgmEl.loop=true; snd.bgmEl.preload='auto'; snd.bgmEl.setAttribute('playsinline','');
-      if(BGM_VIA_WEBAUDIO){ snd.bgmGain=snd.ac.createGain(); snd.bgmGain.gain.value=VOL.bgm;
-        snd.ac.createMediaElementSource(snd.bgmEl).connect(snd.bgmGain); snd.bgmGain.connect(snd.ac.destination); }
+      snd.tracks={};
       applyVol();
     }
     if(snd.ac.state!=='running') snd.ac.resume().catch(()=>{});
   }catch(e){ return null; }
   return snd.ac;
 }
-function teardownAudio(){ // 画面を離れた時：曲の位置を覚えて、全部捨てる
-  if(snd.bgmEl){ if(snd.cur) snd.pos[snd.cur]=snd.bgmEl.currentTime||0; snd.bgmEl.pause(); snd.bgmEl.removeAttribute('src'); try{ snd.bgmEl.load(); }catch(e){} }
-  if(snd.ac){ try{ snd.ac.close(); }catch(e){} }
-  snd.ac=snd.se=snd.bgmEl=snd.bgmGain=null;
+// BGMは曲ごとに専用の<audio>を持つ（1つの<audio>で曲を差し替えると、iPhoneで一部がループすることがあるため）
+function getTrack(name){
+  let t=snd.tracks[name]; if(t) return t;
+  const el=new Audio(); el.loop=true; el.preload='auto'; el.setAttribute('playsinline',''); el.src=encodeURI(bgmFile(name));
+  t={el, gain:null, tok:0};
+  if(BGM_VIA_WEBAUDIO){ t.gain=snd.ac.createGain(); t.gain.gain.value=VOL.bgm;
+    snd.ac.createMediaElementSource(el).connect(t.gain); t.gain.connect(snd.ac.destination); }
+  else el.volume=VOL.bgm;
+  snd.tracks[name]=t; return t;
 }
-let bgmWant=null; // 今流したい曲（title / battle）
+function teardownAudio(){ // 画面を離れた時：曲の位置を覚えて、全部捨てる
+  if(snd.tracks){ for(const k in snd.tracks){ const el=snd.tracks[k].el;
+    if(k===snd.cur) snd.pos[k]=el.currentTime||0; el.pause(); el.removeAttribute('src'); try{ el.load(); }catch(e){} } }
+  if(snd.ac){ try{ snd.ac.close(); }catch(e){} }
+  snd.ac=snd.se=snd.tracks=null;
+}
+let bgmWant=null; // 今流したい曲（title / battle / result）
 function playBgm(name){
   bgmWant=name;
   if(!audioReady()) return;
-  const el=snd.bgmEl;
-  if(snd.cur!==name || !el.src){
-    if(snd.cur && snd.cur!==name) snd.pos[snd.cur]=0; // 曲が変わったら前の曲は頭から
-    snd.cur=name; el.src=encodeURI(bgmFile(name));
-    const t=snd.pos[name]||0; if(t>0) el.addEventListener('loadedmetadata',()=>{ try{ el.currentTime=t; }catch(e){} },{once:true});
-  }
-  const p=el.play(); if(p&&p.catch) p.catch(()=>{});
+  // ほかの曲は止めて、次に流す時は頭から
+  for(const k in snd.tracks) if(k!==name){ const o=snd.tracks[k]; o.tok++; o.el.pause(); if(k===snd.cur) snd.pos[k]=0; }
+  const t=getTrack(name);
+  if(snd.cur!==name){ snd.cur=name; const at=snd.pos[name]||0; try{ t.el.currentTime=at; }catch(e){} }
+  t.tok++; // フェードアウト中の停止予約を取り消す
+  if(t.gain){ const g=t.gain.gain; g.cancelScheduledValues(snd.ac.currentTime); g.setValueAtTime(VOL.bgm,snd.ac.currentTime); }
+  const p=t.el.play(); if(p&&p.catch) p.catch(()=>{});
 }
-function stopBgm(){ bgmWant=null; if(snd.bgmEl){ snd.bgmEl.pause(); } if(snd.cur) snd.pos[snd.cur]=0; snd.cur=null; }
+// 止める：ぷつっと切らずに少しフェードアウト
+function stopBgm(){
+  bgmWant=null;
+  const t=snd.tracks&&snd.cur&&snd.tracks[snd.cur];
+  if(t){ const tok=++t.tok;
+    if(t.gain){ const g=t.gain.gain, now=snd.ac.currentTime; g.cancelScheduledValues(now); g.setValueAtTime(g.value,now); g.linearRampToValueAtTime(0,now+0.35); }
+    setTimeout(()=>{ if(t.tok===tok){ t.el.pause(); try{ t.el.currentTime=0; }catch(e){} } },400); }
+  if(snd.cur) snd.pos[snd.cur]=0; snd.cur=null;
+}
 // 効果音ファイルを鳴らす（無い・読めない時は fallback の仮の音）
 const seRaw={}, seBuf=new WeakMap();
 function playSe(key, fallback){
@@ -987,12 +1007,14 @@ function playSe(key, fallback){
 }
 function applyVol(){
   if(snd.se) snd.se.gain.value=VOL.se;
-  if(snd.bgmEl){ if(snd.bgmGain){ snd.bgmGain.gain.value=VOL.bgm; snd.bgmEl.volume=1; } else snd.bgmEl.volume=VOL.bgm; }
+  if(snd.tracks) for(const k in snd.tracks){ const t=snd.tracks[k];
+    if(t.gain){ if(k===snd.cur) t.gain.gain.value=VOL.bgm; } else t.el.volume=VOL.bgm; }
   document.querySelectorAll('.volRow').forEach(r=>{ const k=r.dataset.k;
     r.querySelector('input').value=Math.round(VOL[k]*100); r.querySelector('.vv').textContent=Math.round(VOL[k]*100)+'%'; });
 }
 // 最初のタップ／クリック、画面に戻ってきた後のタップで音を（作り直して）鳴らす
-function kickAudio(){ if(document.hidden) return; audioReady(); if(bgmWant && snd.bgmEl && snd.bgmEl.paused) playBgm(bgmWant); }
+function kickAudio(){ if(document.hidden) return; if(!audioReady()) return;
+  const t=bgmWant && snd.tracks[bgmWant]; if(bgmWant && (!t || t.el.paused)) playBgm(bgmWant); }
 let firstTouch=true; // 最初に触った時だけタイトル曲を流しはじめる（決着の静けさの後に勝手に鳴らさない）
 const firstKick=()=>{ if(firstTouch){ firstTouch=false; if(!bgmWant) bgmWant='title'; } kickAudio(); };
 addEventListener('pointerdown',firstKick,true);
@@ -1510,10 +1532,14 @@ function loop(){
                                 Math.sin(player.pitch),
                                -Math.cos(player.yaw)*Math.cos(player.pitch)); // エイム(上下込み)
   const headPos=player.pos.clone(); // 目線高さ
-  const camPos=headPos.clone().addScaledVector(aim,-CAM.dist).add(new THREE.Vector3(0,CAM.height,0));
+  const portrait=innerHeight>innerWidth;
+  // 縦画面は横幅がせまいので、手の文字を少し内側に（画面からはみ出さないように）
+  { const hx=portrait?CAM.handPortrait:1.5; HAND_W.x=-hx; HAND_S.x=hx; handW.position.x=-hx; com.handW.position.x=-hx; }
+  const camPos=headPos.clone().addScaledVector(aim,-CAM.dist).add(new THREE.Vector3(0,CAM.height,0))
+    .addScaledVector(rt, portrait?CAM.sidePortrait:0);
   const cr=Math.hypot(camPos.x,camPos.z); if(cr>ARENA_R+4){camPos.x*=(ARENA_R+4)/cr;camPos.z*=(ARENA_R+4)/cr;}
   camera.position.lerp(camPos,0.4);
-  const focus=headPos.clone().addScaledVector(look,6);
+  const focus=headPos.clone().addScaledVector(look, portrait?CAM.aimMeet:6);
   camera.lookAt(focus);
 
   // 自キャラが視界をふさぐ時に薄くする
